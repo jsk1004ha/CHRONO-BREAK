@@ -72,8 +72,8 @@
         .upgrade-row button { padding: 5px 8px; font-size: 0.9em; margin-top: 0; }
         .bottom-panel-buttons { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 600px; margin-top: auto; padding-top: 10px; }
         /* Shop Screen */
-        #shop-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 450px; align-items: center; }
-        .shop-item { background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 15px; width: 100%; display: flex; align-items: center; gap: 15px; }
+        #shop-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 450px; align-items: center; overflow-y: auto; flex-grow: 1; padding: 5px;}
+        .shop-item { background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 15px; width: 100%; display: flex; align-items: center; gap: 15px; flex-shrink: 0; }
         .skin-preview-canvas { background-color: #000; border-radius: 5px; }
         .shop-item-info { flex-grow: 1; text-align: left; }
         .shop-item-name { font-size: 0.9em; }
@@ -116,6 +116,7 @@
             <p class="shard-display">💎 0</p>
             <div id="shop-content"></div>
             <div class="bottom-panel-buttons">
+                 <button id="shop-refresh-button">새로고침 (💎150)</button>
                 <button id="back-to-menu-from-shop-button">뒤로가기</button>
             </div>
         </div>
@@ -145,7 +146,7 @@
     const shardDisplays = document.querySelectorAll('.shard-display');
     const charListPanel = document.getElementById('character-list-panel'), upgradeSection = document.getElementById('upgrade-section'), skinSelectionContainer = document.getElementById('skin-selection-container'), selectedCharDetailsEl = document.getElementById('selected-char-details');
     const charGachaButton = document.getElementById('char-gacha-button'), startGameButton = document.getElementById('start-game-button'), returnToMenuButton = document.getElementById('return-to-menu-button'), controlToggleButton = document.getElementById('control-toggle-button');
-    const hangarButton = document.getElementById('hangar-button'), shopButton = document.getElementById('shop-button');
+    const hangarButton = document.getElementById('hangar-button'), shopButton = document.getElementById('shop-button'), shopRefreshButton = document.getElementById('shop-refresh-button');
     const backToMenuFromHangarBtn = document.getElementById('back-to-menu-from-hangar-button'), backToMenuFromShopBtn = document.getElementById('back-to-menu-from-shop-button');
     const shopContentEl = document.getElementById('shop-content');
     const finalScoreEl = document.getElementById('final-score'), shardsEarnedEl = document.getElementById('shards-earned');
@@ -165,60 +166,51 @@
     const SKIN_PRICES = { normal: 2000, rare: 5000, legendary: 20000 };
     const SKIN_GEOMETRY = {
         default: [{x:0,y:-1},{x:-0.66,y:0.5},{x:0.66,y:0.5}],
-        stinger: [{x:0,y:-1.2},{x:-0.3,y:0.4},{x:-0.8,y:0.2},{x:0.8,y:0.2},{x:0.3,y:0.4}],
-        blade: [{x:0,y:-1.1},{x:-1,y:0.6},{x:0,y:0.3},{x:1,y:0.6}],
-        guardian: [{x:0,y:-1},{x:-0.8,y:-0.2},{x:-0.8,y:0.6},{x:0.8,y:0.6},{x:0.8,y:-0.2}],
-        echo: [{x:0,y:-1},{x:-0.9,y:0},{x:-0.5,y:0.8},{x:0.5,y:0.8},{x:0.9,y:0}],
-        phase: [{x:-0.5,y:-1},{x:0.5,y:-1},{x:1,y:0},{x:0.5,y:1},{x:-0.5,y:1},{x:-1,y:0}],
-        comet: [{x:0,y:-1.2},{x:-0.5,y:0.6},{x:0,y:0.2},{x:0.5,y:0.6}],
-        arbiter: [{x:0,y:-1}, {x:-1,y:0}, {x:-0.7,y:0.8}, {x:0.7,y:0.8}, {x:1,y:0}],
-        sentry: [{x:-0.8,y:-0.8}, {x:0.8,y:-0.8}, {x:0.8,y:0.8}, {x:-0.8,y:0.8}],
-        conjuror: [{x:0,y:-1}, {x:-0.5,y:-0.5}, {x:-0.2,y:0.8}, {x:0.2,y:0.8}, {x:0.5,y:-0.5}],
-        stinger_L: [{x:0,y:-1.3},{x:-0.2,y:-0.5},{x:-1,y:0.7},{x:0,y:0},{x:1,y:0.7},{x:0.2,y:-0.5}],
-        stinger_M: [{x:0,y:-1.4},{x:-0.4,y:0.8},{x:0,y:0.4},{x:0.4,y:0.8},{x:-1.2,y:-0.2},{x:1.2,y:-0.2}],
+        stinger: [{x:0,y:-1.2},{x:-0.3,y:0.4},{x:-0.8,y:0.2},{x:0.8,y:0.2},{x:0.3,y:0.4}], stinger_L: [{x:0,y:-1.3},{x:-0.2,y:-0.5},{x:-1,y:0.7},{x:0,y:0},{x:1,y:0.7},{x:0.2,y:-0.5}], stinger_M: [{x:0,y:-1.4},{x:-0.4,y:0.8},{x:0,y:0.4},{x:0.4,y:0.8},{x:-1.2,y:-0.2},{x:1.2,y:-0.2}],
+        guardian: [{x:0,y:-1},{x:-0.9,y:-0.2},{x:-0.7,y:0.8},{x:0.7,y:0.8},{x:0.9,y:-0.2}], guardian_L: [{x:0,y:-1},{x:-1,y:0},{x:-1,y:0.8},{x:1,y:0.8},{x:1,y:0}], guardian_M: [{x:-1,y:-1},{x:1,y:-1},{x:1,y:0.5},{x:0,y:1},{x:-1,y:0.5}],
+        spectre: [{x:0,y:-1.1}, {x:-0.4,y:-0.5}, {x:-0.8,y:0.6}, {x:0,y:0.2}, {x:0.8,y:0.6}, {x:0.4,y:-0.5}], spectre_L: [{x:0,y:-1.2}, {x:-0.9,y:0.8}, {x:0,y:-0.4}, {x:0.9,y:0.8}], spectre_M: [{x:0,y:-1.3}, {x:-0.5,y:-0.8}, {x:-1.2,y:0.9}, {x:0,y:0.5}, {x:1.2,y:0.9}, {x:0.5,y:-0.8}],
+        pulse: [{x:0,y:-1}, {x:-0.95,y:-0.3}, {x:-0.58,y:0.8}, {x:0.58,y:0.8}, {x:0.95,y:-0.3}], pulse_L: [{x:0,y:-1}, {x:-1,y:0}, {x:0,y:1}, {x:1,y:0}], pulse_M: [{x:0,y:-1.2}, {x:-1,y:-0.6}, {x:-1,y:0.6}, {x:0,y:1.2}, {x:1,y:0.6}, {x:1,y:-0.6}],
+        blade: [{x:0,y:-1.1},{x:-1,y:0.6},{x:0,y:0.3},{x:1,y:0.6}], blade_L: [{x:0,y:-1.2}, {x:-0.4,y:0.9}, {x:0,y:-0.5}, {x:0.4,y:0.9}], blade_M: [{x:0,y:-1.3}, {x:-1.2,y:1}, {x:0,y:0.4}, {x:1.2,y:1}],
+        nova: [{x:0,y:-1}, {x:-0.8,y:0}, {x:-0.3,y:0.8}, {x:0.3,y:0.8}, {x:0.8,y:0}], nova_L: [{x:0,y:-1.2}, {x:-0.5,y:-0.5}, {x:-1,y:0.5}, {x:0,y:0.8}, {x:1,y:0.5}, {x:0.5,y:-0.5}], nova_M: [{x:0,y:-1.3}, {x:-1,y:-0.8}, {x:-0.5,y:0.9}, {x:0.5,y:0.9}, {x:1,y:-0.8}],
+        rift: [{x:0,y:-1.1}, {x:-0.6,y:-0.6}, {x:-0.9,y:0.7}, {x:0,y:0.2}, {x:0.9,y:0.7}, {x:0.6,y:-0.6}], rift_L: [{x:0,y:-1.2}, {x:-1.1,y:0}, {x:0,y:1.2}, {x:1.1,y:0}], rift_M: [{x:0,y:-1.3}, {x:-0.8,y:0}, {x:0,y:-0.5}, {x:0.8,y:0}, {x:-0.4,y:1}, {x:0.4,y:1}],
+        aegis: [{x:-0.8,y:-0.8}, {x:0.8,y:-0.8}, {x:1,y:0.6}, {x:0,y:1}, {x:-1,y:0.6}], aegis_L: [{x:-1,y:-1}, {x:1,y:-1}, {x:1.2,y:0.7}, {x:0,y:1.2}, {x:-1.2,y:0.7}], aegis_M: [{x:-1.2,y:-1.2}, {x:1.2,y:-1.2}, {x:1.2,y:1.2}, {x:-1.2,y:1.2}],
+        berserker: [{x:0,y:-1.2}, {x:-0.3,y:-0.3}, {x:-1,y:-0.5}, {x:-0.5,y:0.8}, {x:0.5,y:0.8}, {x:1,y:-0.5}, {x:0.3,y:-0.3}], berserker_L: [{x:0,y:-1.3}, {x:-1.2,y:-0.5}, {x:-0.6,y:0.9}, {x:0.6,y:0.9}, {x:1.2,y:-0.5}], berserker_M: [{x:0,y:-1.4}, {x:-1,y:-1}, {x:-1.3,y:0}, {x:-0.5,y:1}, {x:0.5,y:1}, {x:1.3,y:0}, {x:1,y:-1}],
+        tempest: [{x:0,y:-1}, {x:-1,y:0.2}, {x:-0.5,y:0.8}, {x:0.5,y:0.8}, {x:1,y:0.2}], tempest_L: [{x:0,y:-1.1}, {x:-0.8,y:-0.8}, {x:-1.1,y:0}, {x:-0.8,y:0.8}, {x:0,y:1.1}, {x:0.8,y:0.8}, {x:1.1,y:0}, {x:0.8,y:-0.8}], tempest_M: [{x:0,y:-1.2}, {x:-0.5,y:-0.5}, {x:-1.2,y:-0.5}, {x:-0.7,y:0.8}, {x:0.7,y:0.8}, {x:1.2,y:-0.5}, {x:0.5,y:-0.5}],
+        phase: [{x:-0.5,y:-1},{x:0.5,y:-1},{x:1,y:0},{x:0.5,y:1},{x:-0.5,y:1},{x:-1,y:0}], phase_L: [{x:-0.8,y:-1.1}, {x:0.8,y:-1.1}, {x:1.2,y:0}, {x:0,y:1.1}, {x:-1.2,y:0}], phase_M: [{x:0,y:-1.2}, {x:-1,y:-0.2}, {x:-0.6,y:1.2}, {x:0.6,y:1.2}, {x:1,y:-0.2}],
+        echo: [{x:0,y:-1},{x:-0.9,y:0},{x:-0.5,y:0.8},{x:0.5,y:0.8},{x:0.9,y:0}], echo_L: [{x:0,y:-1.1}, {x:-1,y:-0.5}, {x:-0.8,y:0.9}, {x:0.8,y:0.9}, {x:1,y:-0.5}], echo_M: [{x:0,y:-1.2}, {x:-0.6,y:-0.6}, {x:0.6,y:-0.6}, {x:-1.2,y:0.4}, {x:1.2,y:0.4}, {x:-0.6,y:1}, {x:0.6,y:1}],
+        comet: [{x:0,y:-1.2},{x:-0.5,y:0.6},{x:0,y:0.2},{x:0.5,y:0.6}], comet_L: [{x:0,y:-1.3}, {x:-0.8,y:0.8}, {x:0,y:-0.2}, {x:0.8,y:0.8}], comet_M: [{x:0,y:-1.4}, {x:-0.4,y:-0.2}, {x:-1,y:0.9}, {x:0,y:0.5}, {x:1,y:0.9}, {x:0.4,y:-0.2}],
+        arbiter: [{x:0,y:-1}, {x:-1,y:0}, {x:-0.7,y:0.8}, {x:0.7,y:0.8}, {x:1,y:0}], arbiter_L: [{x:0,y:-1.1}, {x:-1.2,y:-0.2}, {x:-0.8,y:0.9}, {x:0.8,y:0.9}, {x:1.2,y:-0.2}], arbiter_M: [{x:0,y:-1.2}, {x:-1.2,y:-0.4}, {x:-1,y:0.9}, {x:0,y:0.6}, {x:1,y:0.9}, {x:1.2,y:-0.4}],
+        sentry: [{x:-0.8,y:-0.8}, {x:0.8,y:-0.8}, {x:0.8,y:0.8}, {x:-0.8,y:0.8}], sentry_L: [{x:-1,y:-1}, {x:1,y:-1}, {x:1,y:1}, {x:-1,y:1}, {x:-1,y:-1}, {x:-0.6,y:-0.6}, {x:0.6,y:-0.6}, {x:0.6,y:0.6}, {x:-0.6,y:0.6}, {x:-0.6,y:-0.6}], sentry_M: [{x:-1.2,y:-1.2}, {x:1.2,y:-1.2}, {x:1.2,y:1.2}, {x:-1.2,y:1.2}, {x:-1.2,y:-1.2}, {x:0,y:-0.8}, {x:0.8,y:0}, {x:0,y:0.8}, {x:-0.8,y:0}, {x:0,y:-0.8}],
+        conjuror: [{x:0,y:-1}, {x:-0.5,y:-0.5}, {x:-0.2,y:0.8}, {x:0.2,y:0.8}, {x:0.5,y:-0.5}], conjuror_L: [{x:0,y:-1.1}, {x:-0.8,y:-0.4}, {x:-0.8,y:0.8}, {x:0,y:0.4}, {x:0.8,y:0.8}, {x:0.8,y:-0.4}], conjuror_M: [{x:0,y:-1.2}, {x:-0.5,y:-0.9}, {x:-1.2,y:0.2}, {x:-0.5,y:1}, {x:0.5,y:1}, {x:1.2,y:0.2}, {x:0.5,y:-0.9}]
     };
 
-    const SKIN_DATA = {
-        // --- Template ---
-        _template: {
-            default:   { name: '기본', shipColor: '#cccccc', attackColor: '#ffffff', accentColor: '#ffffff', geometry: 'default', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            normal:    { name: '노멀', shipColor: '#ffffff', attackColor: '#ffffff', accentColor: '#ffffff', geometry: 'default', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            rare:      { name: '레어', shipColor: '#00aaff', attackColor: '#00aaff', accentColor: '#ffffff', geometry: 'default', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            legendary: { name: '레전더리', shipColor: '#ff8000', attackColor: '#ff8000', accentColor: '#ffff00', geometry: 'default_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false },
-            mythic:    { name: '신화', shipColor: '#ff40ff', attackColor: '#ff40ff', accentColor: '#ffffff', geometry: 'default_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
-        },
-        stinger: {
-            default:   { name: '기본', shipColor: '#00dddd', attackColor: '#00ffff', accentColor: '#ff00ff', geometry: 'stinger', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            normal:    { name: '에메랄드', shipColor: '#00ff88', attackColor: '#00ffff', accentColor: '#ff00ff', geometry: 'stinger', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            rare:      { name: '사파이어', shipColor: '#7df9ff', attackColor: '#7df9ff', accentColor: '#ff00ff', geometry: 'stinger', killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            legendary: { name: '인페르노', shipColor: '#ff4500', attackColor: '#ff8c00', accentColor: '#ffff00', geometry: 'stinger_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false },
-            mythic:    { name: '보이드리퍼', shipColor: '#9400d3', attackColor: '#ee82ee', accentColor: '#00ffff', geometry: 'stinger_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
-        },
-        // Other characters would be filled in similarly...
-    };
+    const SKIN_DATA = {};
+    const ALL_CHAR_IDS = ['stinger', 'guardian', 'spectre', 'pulse', 'blade', 'nova', 'rift', 'aegis', 'berserker', 'tempest', 'phase', 'echo', 'comet', 'arbiter', 'sentry', 'conjuror'];
     
-    // Auto-populate other characters with a base skin set for demonstration
-    ['guardian', 'spectre', 'pulse', 'blade', 'nova', 'rift', 'aegis', 'berserker', 'tempest', 'phase', 'echo', 'comet', 'arbiter', 'sentry', 'conjuror'].forEach(id => {
-        if (!SKIN_DATA[id]) {
-            SKIN_DATA[id] = JSON.parse(JSON.stringify(SKIN_DATA._template)); // Deep copy
-            SKIN_DATA[id].default.name = '기본';
-            SKIN_DATA[id].default.geometry = SKIN_GEOMETRY[id] ? id : 'default';
-            SKIN_DATA[id].normal.geometry = SKIN_GEOMETRY[id] ? id : 'default';
-            SKIN_DATA[id].rare.geometry = SKIN_GEOMETRY[id] ? id : 'default';
-            // Simple color variations for auto-generated skins
-            SKIN_DATA[id].default.shipColor = '#cccccc';
-            SKIN_DATA[id].normal.shipColor = '#9acd32';
-            SKIN_DATA[id].rare.shipColor = '#ba55d3';
-            SKIN_DATA[id].rare.attackColor = '#ba55d3';
-            SKIN_DATA[id].legendary.shipColor = '#ffa500';
-            SKIN_DATA[id].legendary.attackColor = '#ff4500';
-            SKIN_DATA[id].mythic.shipColor = '#1e90ff';
-            SKIN_DATA[id].mythic.attackColor = '#00ffff';
-        }
+    // --- FULL SKIN DATA POPULATION ---
+    ALL_CHAR_IDS.forEach(id => {
+        SKIN_DATA[id] = {
+            default:   { name: '기본', shipColor: '#cccccc', attackColor: '#ffffff', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
+            normal:    { name: '커스텀', shipColor: '#9acd32', attackColor: '#ffffff', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
+            rare:      { name: '크림슨', shipColor: '#dc143c', attackColor: '#ff6347', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
+            legendary: { name: '레전더리', shipColor: '#ff8000', attackColor: '#ff8000', accentColor: '#ffff00', geometry: id+'_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false },
+            mythic:    { name: '신화', shipColor: '#ff40ff', attackColor: '#ff40ff', accentColor: '#ffffff', geometry: id+'_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
+        };
     });
-    delete SKIN_DATA._template;
-
-
+    // Unique Legendary/Mythic names and colors
+    SKIN_DATA.stinger.legendary = { name: '인페르노', shipColor: '#ff4500', attackColor: '#ff8c00', accentColor: '#ffff00', geometry: 'stinger_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.stinger.mythic = { name: '보이드리퍼', shipColor: '#9400d3', attackColor: '#ee82ee', accentColor: '#00ffff', geometry: 'stinger_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.guardian.legendary = { name: '골리앗', shipColor: '#a0522d', attackColor: '#cd853f', accentColor: '#f4a460', geometry: 'guardian_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.guardian.mythic = { name: '성채', shipColor: '#dcdcdc', attackColor: '#ffffff', accentColor: '#ffd700', geometry: 'guardian_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.spectre.legendary = { name: '팬텀', shipColor: '#e6e6fa', attackColor: '#dda0dd', accentColor: '#ffffff', geometry: 'spectre_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.spectre.mythic = { name: '밴시', shipColor: '#00ced1', attackColor: '#48d1cc', accentColor: '#f0ffff', geometry: 'spectre_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.blade.legendary = { name: '무라마사', shipColor: '#b22222', attackColor: '#ff3333', accentColor: '#ffffff', geometry: 'blade_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.blade.mythic = { name: '엑스칼리버', shipColor: '#ffd700', attackColor: '#fffacd', accentColor: '#ffffff', geometry: 'blade_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.nova.legendary = { name: '태양 작렬', shipColor: '#ff8c00', attackColor: '#ffa500', accentColor: '#ff4500', geometry: 'nova_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.nova.mythic = { name: '초신성', shipColor: '#4169e1', attackColor: '#87cefa', accentColor: '#ffffff', geometry: 'nova_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.sentry.legendary = { name: '요새', shipColor: '#696969', attackColor: '#a9a9a9', accentColor: '#d3d3d3', geometry: 'sentry_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.sentry.mythic = { name: '최종 방어선', shipColor: '#f0e68c', attackColor: '#ffd700', accentColor: '#ffffff', geometry: 'sentry_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    
     let characters = {
         stinger:   { name: '스팅어', icon: '▶', unlocked: true,  attackDesc: '전방 집중형 표준 샷', specialDesc: '전체 화면 폭탄' },
         guardian:  { name: '가디언', icon: '❖', unlocked: false, attackDesc: '광역 부채꼴 샷', specialDesc: '시작 폭탄 +1' },
@@ -252,7 +244,7 @@
 
     let upgrades = { power: { name: '시작 파워', level: 0, maxLevel: 3, cost: [1000, 3000, 7000] }, bombs: { name: '시작 폭탄', level: 0, maxLevel: 2, cost: [2000, 5000] }, gauge: { name: '게이지 효율', level: 0, maxLevel: 4, cost: [1500, 3500, 6000, 9000] }, magnet: { name: '아이템 자석', level: 0, maxLevel: 1, cost: [10000] } };
 
-    // --- 2. 사운드 시스템 (생략) ---
+    // --- 2. 사운드 시스템 ---
     let audioContext; const audioBuffers = {};
     const soundAssets = { shoot: 'data:audio/wav;base64,UklGRlgAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAP//AwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8=', explosion: 'data:audio/wav;base64,UklGRlIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSgAAAA+Pj8/Pz4+Pj4+Pj49PT09PTw8PDs7Ozo6Ojk5OTg4ODc3Njc2NjU1NTQ0NDMzMzIyMjExMTAwLy8uLSwrKikoJyYmJSUlJCQkIyIiISAgHx4eHBsaGRgXFhUUExITEREOBwgFBAIB', graze: 'data:audio/wav;base64,UklGRlAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAA//8BAAECBQQHCAkKCw0ODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc4OTo7PD0+P0A=', playerHit: 'data:audio/wav;base64,UklGRmAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVwAAABAAAD8AP4A/gD9APwA+wD5APgA9wD0APMA8gDxAPAA7wDsAOsA6ADnAOYA4wDiAOEA3wDcANsA2ADRANAAzwDMAssCyQLEAsECwQHCAb8BvgG9AbwBvQG+Ab8BwgHCAsECwQLFAsYCyQLLAMwA0ADSANkA3ADeAOAA4wDnAOoA7QDyAPUA+gD/AAQBCgEQARYBGgEcASQBKgEuATMBPAE/AUQBSgFOAVIBVwFYAVwBXgFiAWgBbAFwAW8BcgF3AXgBewF9AX8BfwF+AXwBcgFvAWwBagFkAWQBZAFhAVgBUwFPAUkBRQFBAT4BOgEwASoBJwEhARwBFgEOAQsBBgECAP4A+wD0AO0A5wDhANkA0AC/AbwBsgGnAZwBlgGRAZAAkAGSAZgBoQGwAbwBwwHNAeYB+gIIAhMCHQImAiwCMAI3Aj4CRQJMAloCXQJgAmYCcAJ2AoACjgKiAq4CwgLPAtgC4gLrAvUC+wL+AwIDBwMLAxcDGgMiAykDMANAA0sDWANgA2gDcAN8A4gDkQOcA6sDtQO/A8wD3APqA/0DAwQIBhEKDxQVGh0gIycoMDM5PEBHS1JcYW5xfISQlp+lrsbT3+n6/w==', itemGet: 'data:audio/wav;base64,UklGRkIAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YRoAAAAaGxwdHh8gISIjJCUmJygpKissLS4vMDEyMzQ1Njc=', chronoStart: 'data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAAPz49Ozg1MzExLy0rKCcmJSQjIiAfHhsZFRMREQ4HCAUEAgE=', chronoEnd: 'data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAAAgQFBwgODxAREhMUFRYXGBkaGxwdHh8gISIjJCUmJygp', laser: 'data:audio/wav;base64,UklGRlQDAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YUwDAAB/f3+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/wABAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQUJDREVGR0hJSktMTU5PUFFSU1VWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn+AgYKDhIWGh4iJiouMjY6PkJGSk5SVlpeYmZqbnJ2en6ChoqOkpaanqKmqq6ytrq+wsbKztLW2t7i5uru8vb6/wMHCw8TFxsfIycrLzM3Oz9DR0tPU1dbX2Nna29zd3t/g4eLj5OXm5+jp6uvs7e7v8PHy8/T19vf4+fr7/P3+/w==', blink: 'data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAADg3uLa0s/LxcC4t7GuqaSgmpaTkZGNi4eCfnx3cWpnZWBgXVpYVFFOTEpIRkBERUJGQj89Ojg1NC8uKScnJSUlJCQjIiEgHx4cHBsaGRgXFhUUExITEREOBwgFBAIB', shieldUp: 'data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAAQUJDREVGR0hJSktMTU5PUFFSU1VWV1hZWltcXV5fYGFiY2RlZmdoaQ==', shieldDown: 'data:audio/wav;base64,UklGRkAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAAaGlmZWRjYmFfYV5dWltZWFhVVFNRS0dFRENCQUA/PTw6OQ==', parry: 'data:audio/wav;base64,UklGRlAAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YSAAAAAA+vr5+Pb18/Lx7+/u7ezr6ufm5eHh39/e3dza2dvY19XU09LR0M/NzMvKyMfGxcLDv728ubq5t7S0s6+ur6yqp6SjoZ+dm5iWlZGOjYqHh4B+fXt4doA=' };
     async function initAudio() { if (audioContext) return; try { audioContext = new (window.AudioContext || window.webkitAudioContext)(); for (const name of Object.keys(soundAssets)) { const response = await fetch(soundAssets[name]); const arrayBuffer = await response.arrayBuffer(); audioBuffers[name] = await audioContext.decodeAudioData(arrayBuffer); } } catch (e) { console.error("Web Audio API error", e); } }
@@ -363,7 +355,7 @@
         deployTurret() { playSound('shieldUp'); this.turretCooldown = this.turretMaxCooldown; turrets.push(new Turret(this.x, this.y, this.power, this.attackColor)); if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 30); } }
         summonAllies() { playSound('itemGet'); this.summonCooldown = this.summonMaxCooldown; allies.push(new Ally(this.x - 20, this.y, this.power, this.attackColor)); allies.push(new Ally(this.x + 20, this.y, this.power, this.attackColor)); if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 30, {type: 'spark'}); } }
     }
-    class Bullet { // 생략
+    class Bullet {
         constructor(x, y, angle, speed, owner, special = {}) {
             this.x = x; this.y = y; this.owner = owner; this.special = special;
             this.color = (owner === 'player' && special.color) ? special.color : colors.enemyBullet;
@@ -388,7 +380,7 @@
             ctx.fill(); ctx.shadowBlur = 0;
         }
     }
-    class Enemy { // 생략
+    class Enemy {
         constructor(x, y, type) { this.x = x; this.y = y; this.type = type; const difficulty = 1 + wave * 0.22; this.init(difficulty); this.isElite = false; if (wave > 10 && Math.random() < 0.1) this.makeElite(difficulty); }
         init(difficulty) { this.shootTimer = Math.random() * 2 + 1; this.bulletSpeed = 250 * (1 + wave * 0.1); switch(this.type) { case 'bulwark': this.size = 25; this.health = 80 * difficulty; this.color = colors.bulwark; this.speed = 30; this.scoreValue = 500; break; case 'sentinel': this.size = 18; this.health = 20 * difficulty; this.color = colors.sentinel; this.speed = 20; this.scoreValue = 400; this.laserCharge = 0; this.laserMaxCharge = 3; break; case 'barrier': this.size = 20; this.health = 30 * difficulty; this.color = colors.barrier; this.speed = 50; this.scoreValue = 350; this.shieldHealth = 50 * difficulty; break; case 'dasher': this.size = 12; this.health = 10 * difficulty; this.color = colors.dasher; this.speed = 300; this.scoreValue = 150; this.vy = this.speed; this.vx = Math.random() > 0.5 ? 100 : -100; break; case 'weaver': this.size = 18; this.health = 25 * difficulty; this.color = colors.weaver; this.speed = 80; this.scoreValue = 250; this.baseX = this.x; this.angle = 0; break; case 'kamikaze': this.size = 15; this.health = 5 * difficulty; this.color = colors.kamikaze; this.speed = 150; this.scoreValue = 200; break; case 'basic': this.size = 15; this.health = 15 * difficulty; this.color = colors.enemy1; this.speed = 100; this.scoreValue = 100; break; case 'shooter': this.size = 20; this.health = 40 * difficulty; this.color = colors.enemy2; this.speed = 60; this.scoreValue = 300; break; case 'boss': this.size = 50; this.health = (2000 + wave * 600) * difficulty; this.maxHealth = this.health; this.color = colors.boss; this.speed = 50; this.scoreValue = 10000; this.pattern = 'entry'; this.patternTimer = 0; this.patternDuration = 8; this.bulletSpeed *= 1.2; break; } }
         makeElite(difficulty) { this.isElite = true; this.health *= 2; this.bulletSpeed *= 1.2; this.color = '#FFD700'; this.scoreValue *= 3; if (this.shieldHealth) this.shieldHealth *= 2; }
@@ -471,22 +463,22 @@
             }
         }
     }
-    class Particle { // 생략
+    class Particle {
         constructor(x, y, color, size, options = {}) { this.x = x; this.y = y; this.color = color; this.size = Math.random() * size + 2; this.lifespan = options.lifespan || 1; this.initialLifespan = this.lifespan; this.options = options; this.vx = (Math.random() - 0.5) * (options.speed || 150); this.vy = (Math.random() - 0.5) * (options.speed || 150); if (options.type === 'spark') { const angle = Math.random() * Math.PI * 2; this.vx = Math.cos(angle) * 300; this.vy = Math.sin(angle) * 300; } if (options.type === 'trail') { this.vx = 0; this.vy = 0; } }
         update(deltaTime) { this.x += this.vx * deltaTime * gameSpeed; this.y += this.vy * deltaTime * gameSpeed; this.lifespan -= deltaTime; if(this.options.type === 'spark' || this.options.type === 'nova') { this.vx *= 0.9; this.vy *= 0.9; } }
         draw(ctx) { ctx.globalAlpha = this.options.fade ? this.lifespan / this.initialLifespan : this.lifespan > 0.5 ? 1 : this.lifespan * 2; ctx.fillStyle = (this.options.type === 'nova' && Math.random() < 0.5) ? this.options.secondaryColor : this.color; ctx.beginPath(); if (this.options.type === 'warp') { ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size); } else { ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); } ctx.fill(); ctx.globalAlpha = 1; }
     }
-    class PowerUpItem { // 생략
+    class PowerUpItem {
         constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.size = 12; this.speed = 80; this.angle = 0; switch(type) { case 'P': this.color = colors.powerupP; break; case 'B': this.color = colors.powerupB; break; case 'C': this.color = colors.powerupC; break; case 'S': this.color = colors.powerupS; break; } }
         update(deltaTime) { this.angle += deltaTime * 5; if (upgrades.magnet.level > 0 && player) { const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x); this.x += Math.cos(angleToPlayer) * 300 * deltaTime; this.y += Math.sin(angleToPlayer) * 300 * deltaTime; } else { this.y += this.speed * deltaTime * gameSpeed; } }
         draw(ctx) { ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle); ctx.fillStyle = this.color; ctx.shadowColor = this.color; ctx.shadowBlur = 10; ctx.beginPath(); ctx.rect(-this.size, -this.size, this.size*2, this.size*2); ctx.fill(); ctx.shadowBlur = 0; ctx.fillStyle = 'white'; ctx.font = 'bold 12px "Press Start 2P"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const symbol = this.type === 'S' ? '💎' : this.type; ctx.fillText(symbol, 0, 1); ctx.restore(); }
     }
-    class Turret { // 생략
+    class Turret {
         constructor(x, y, power, color) {
             this.x = x; this.y = y; this.power = power; this.size = 15;
             this.lifespan = 8 + power * 0.5;
             this.shootCooldown = 0;
-            this.color = color || SKIN_COLORS.sentry.default.shipColor;
+            this.color = color || SKIN_DATA.sentry.default.shipColor;
         }
         update(deltaTime) {
             this.lifespan -= deltaTime * gameSpeed;
@@ -518,12 +510,12 @@
             }
         }
     }
-    class Ally { // 생략
+    class Ally {
         constructor(x, y, power, color) {
             this.x = x; this.y = y; this.power = power; this.size = 8;
             this.lifespan = 10 + power;
             this.shootCooldown = 0;
-            this.color = color || SKIN_COLORS.conjuror.default.shipColor;
+            this.color = color || SKIN_DATA.conjuror.default.shipColor;
             this.speed = 200;
         }
         update(deltaTime) {
@@ -636,17 +628,15 @@
     function startOrRestartGame() { mainMenuScreen.style.display = 'none'; resetGame(); if (!animationFrameId) { lastTime = 0; animationFrameId = requestAnimationFrame(gameLoop); } }
 
     // --- 6. 데이터 관리 및 UI ---
-    function saveData() { localStorage.setItem('chronoBreakData_v8', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals })); }
+    function saveData() { localStorage.setItem('chronoBreakData_v9', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals })); }
     function loadData() {
-        let data = JSON.parse(localStorage.getItem('chronoBreakData_v8'));
+        let data = JSON.parse(localStorage.getItem('chronoBreakData_v9'));
         if (!data) {
-            data = JSON.parse(localStorage.getItem('chronoBreakData_v7')) || JSON.parse(localStorage.getItem('chronoBreakData_v6'));
+            data = JSON.parse(localStorage.getItem('chronoBreakData_v8')) || JSON.parse(localStorage.getItem('chronoBreakData_v7'));
             if (data && data.characters) {
                 const defaultCharacters = initializeCharacterData(characters);
                 Object.keys(defaultCharacters).forEach(id => {
-                    if (!data.characters[id]) {
-                        data.characters[id] = defaultCharacters[id];
-                    }
+                    if (!data.characters[id]) { data.characters[id] = defaultCharacters[id]; }
                 });
                 data.characters = initializeCharacterData(data.characters);
             }
@@ -661,9 +651,7 @@
             if (data.characters) {
                 const loadedChars = initializeCharacterData(data.characters);
                 Object.keys(characters).forEach(id => {
-                    if (loadedChars[id]) {
-                        Object.assign(characters[id], loadedChars[id]);
-                    }
+                    if (loadedChars[id]) { Object.assign(characters[id], loadedChars[id]); }
                 });
             }
         }
@@ -685,66 +673,81 @@
         shopContentEl.innerHTML = '';
         if (dailyDeals.items.length === 0) {
             shopContentEl.innerHTML = '<p>오늘의 상품이 모두 판매되었거나, 구매 가능한 스킨이 없습니다.</p>';
-            return;
+        } else {
+            dailyDeals.items.forEach(item => {
+                const charData = characters[item.charId];
+                const skinData = charData.skins[item.skinId];
+                const skinInfo = SKIN_DATA[item.charId][item.skinId];
+                const isOwned = skinData.unlocked;
+                const price = SKIN_PRICES[item.skinId];
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'shop-item';
+                
+                const previewCanvas = document.createElement('canvas');
+                previewCanvas.className = 'skin-preview-canvas';
+                previewCanvas.width = 60; previewCanvas.height = 60;
+                drawPlayerPreview(previewCanvas, item.charId, item.skinId);
+                
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'shop-item-info';
+                infoDiv.innerHTML = `<div class="shop-item-name">${charData.name} - ${skinInfo.name}</div>
+                                <div class="shop-item-rarity-${item.skinId}">${item.skinId}</div>
+                                <div class="shop-item-price">💎 ${price}</div>`;
+
+                const buyButton = document.createElement('button');
+                buyButton.textContent = isOwned ? '보유중' : '구매';
+                buyButton.disabled = isOwned || chronoShards < price;
+                buyButton.onclick = () => buySkin(item.charId, item.skinId, price);
+
+                itemDiv.appendChild(previewCanvas);
+                itemDiv.appendChild(infoDiv);
+                itemDiv.appendChild(buyButton);
+                shopContentEl.appendChild(itemDiv);
+            });
         }
-        dailyDeals.items.forEach(item => {
-            const charData = characters[item.charId];
-            const skinData = charData.skins[item.skinId];
-            const skinInfo = SKIN_DATA[item.charId][item.skinId];
-            const isOwned = skinData.unlocked;
-            const price = SKIN_PRICES[item.skinId];
-
-            const itemDiv = document.createElement('div');
-            itemDiv.className = 'shop-item';
-            
-            const previewCanvas = document.createElement('canvas');
-            previewCanvas.className = 'skin-preview-canvas';
-            previewCanvas.width = 60; previewCanvas.height = 60;
-            drawPlayerPreview(previewCanvas, item.charId, item.skinId);
-            
-            const infoDiv = document.createElement('div');
-            infoDiv.className = 'shop-item-info';
-            infoDiv.innerHTML = `<div class="shop-item-name">${charData.name} - ${skinInfo.name}</div>
-                               <div class="shop-item-rarity-${item.skinId}">${item.skinId}</div>
-                               <div class="shop-item-price">💎 ${price}</div>`;
-
-            const buyButton = document.createElement('button');
-            buyButton.textContent = isOwned ? '보유중' : '구매';
-            buyButton.disabled = isOwned || chronoShards < price;
-            buyButton.onclick = () => buySkin(item.charId, item.skinId, price);
-
-            itemDiv.appendChild(previewCanvas);
-            itemDiv.appendChild(infoDiv);
-            itemDiv.appendChild(buyButton);
-            shopContentEl.appendChild(itemDiv);
-        });
+        const potentialSkins = getPotentialSkins();
+        shopRefreshButton.disabled = chronoShards < 150 || potentialSkins.length < 5;
     }
-    function generateDailyDeals() {
-        const today = new Date().toDateString();
-        if (dailyDeals.date === today) return;
-
-        const potentialSkins = { normal: [], rare: [], legendary: [] };
+    function getPotentialSkins() {
+        const potential = [];
         Object.keys(characters).forEach(charId => {
             if (characters[charId].unlocked) {
                 Object.keys(characters[charId].skins).forEach(skinId => {
                     if (!characters[charId].skins[skinId].unlocked && SKIN_PRICES[skinId]) {
-                        potentialSkins[skinId]?.push({ charId, skinId });
+                        potential.push({ charId, skinId });
                     }
                 });
             }
         });
-        
-        const newDeals = [];
-        ['normal', 'rare', 'legendary'].forEach(rarity => {
-            if (potentialSkins[rarity].length > 0) {
-                const availableForRarity = potentialSkins[rarity];
-                const deal = availableForRarity[Math.floor(Math.random() * availableForRarity.length)];
-                newDeals.push(deal);
-            }
-        });
+        return potential;
+    }
+    function generateDailyDeals(forceRefresh = false) {
+        const today = new Date().toDateString();
+        if (dailyDeals.date === today && !forceRefresh) return;
 
+        const potentialSkins = getPotentialSkins();
+        
+        // Shuffle the array
+        for (let i = potentialSkins.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [potentialSkins[i], potentialSkins[j]] = [potentialSkins[j], potentialSkins[i]];
+        }
+        
+        const newDeals = potentialSkins.slice(0, 5);
         dailyDeals = { date: today, items: newDeals };
         saveData();
+    }
+    function refreshShop() {
+        const cost = 150;
+        if (chronoShards >= cost) {
+            chronoShards -= cost;
+            playSound('itemGet');
+            generateDailyDeals(true); // Force refresh
+            updateAllUI();
+        } else {
+            alert(`샤드가 부족합니다. (필요: 💎${cost})`);
+        }
     }
     function drawPlayerPreview(targetCanvas, charId, skinId) {
         const pCtx = targetCanvas.getContext('2d');
@@ -796,6 +799,7 @@
         
         hangarButton.onclick = () => { mainMenuScreen.style.display = 'none'; hangarScreen.style.display = 'flex'; updateHangarScreen(); };
         shopButton.onclick = () => { mainMenuScreen.style.display = 'none'; shopScreen.style.display = 'flex'; updateShopScreen(); };
+        shopRefreshButton.onclick = refreshShop;
         backToMenuFromHangarBtn.onclick = () => { hangarScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
         backToMenuFromShopBtn.onclick = () => { shopScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
 
