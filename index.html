@@ -39,17 +39,19 @@
         .screen-overlay button:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.2); }
         .screen-overlay button:active { transform: scale(0.95); }
         .screen-overlay button:disabled { background-color: #555; color: #888; cursor: not-allowed; box-shadow: none; }
-        #main-menu-screen { display: flex; justify-content: center; gap: 20px; }
-        #game-over-screen, #hangar-screen, #shop-screen { display: none; }
+        #main-menu-screen { display: flex; justify-content: center; gap: 15px; }
+        #game-over-screen, #hangar-screen, #shop-screen, #profile-screen { display: none; }
         #game-over-screen h1 { text-shadow: 2px 2px 0px #ff0000, -2px -2px 0px #ff0000, 2px -2px 0px #ff0000, -2px 2px 0px #ff0000; }
-        .shard-display { color: var(--shard-color); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--button-border); }
+        .shard-display { color: var(--shard-color); font-size: 1.2em; font-weight: bold; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--button-border); }
+        #main-title-display { color: var(--rarity-legendary); font-size: 0.8em; margin-bottom: 10px; }
         #shards-earned.animate { animation: pop-in 0.5s ease-out; }
         @keyframes pop-in { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
         .main-menu-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; max-width: 400px; }
         .main-menu-buttons button { padding: 15px 20px; font-size: 1.2em; width: 100%; }
-        /* Hangar Screen */
-        #hangar-content { display: flex; width: 100%; max-width: 600px; gap: 10px; flex-grow: 1; min-height: 0; }
-        #character-list-panel { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 5px; flex-basis: 45%; }
+        /* Hangar & Profile Content */
+        .content-panel { display: flex; width: 100%; max-width: 600px; gap: 10px; flex-grow: 1; min-height: 0; }
+        .left-panel { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 5px; flex-basis: 45%; }
+        .right-panel { flex-basis: 55%; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 10px; overflow-y: auto; }
         .char-portrait { width: 100%; height: 80px; border: 3px solid var(--button-border); border-radius: 10px; cursor: pointer; display: flex; justify-content: flex-start; align-items: center; transition: all 0.2s; padding: 10px; background: rgba(0,0,0,0.2); position: relative; gap: 10px; }
         .char-portrait.selected { border-color: var(--player-color); background: rgba(0, 255, 255, 0.1); box-shadow: 0 0 10px var(--player-color); }
         .char-portrait.locked { background-color: rgba(0,0,0,0.7); cursor: pointer; }
@@ -58,7 +60,6 @@
         .char-icon { font-size: 2em; }
         .char-name { font-weight: bold; font-size: 0.8em; }
         .char-highscore { font-size: 0.6em; color: var(--enemy-color-2); }
-        #right-panel { flex-basis: 55%; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 10px; overflow-y: auto; }
         #selected-char-details { text-align: left; font-size: 0.7em; line-height: 1.3; border-bottom: 1px solid var(--button-border); padding-bottom: 8px; }
         #selected-char-details h3 { font-size: 1.2em; text-align: center; margin-bottom: 5px; }
         #selected-char-details p { margin-left: 5px; }
@@ -80,6 +81,22 @@
         .shop-item-rarity-normal { color: var(--rarity-normal); } .shop-item-rarity-rare { color: var(--rarity-rare); } .shop-item-rarity-legendary { color: var(--rarity-legendary); }
         .shop-item-price { font-size: 0.8em; color: var(--shard-color); }
         .shop-item button { font-size: 0.8em; padding: 8px 12px; margin: 0; }
+        /* Profile Screen */
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+        .tab-buttons button { margin-top: 0; }
+        .tab-buttons button.active { background-color: var(--player-color); color: var(--bg-color); }
+        .tab-content { width: 100%; display: none; flex-grow: 1; overflow-y: auto; }
+        .tab-content.active { display: block; }
+        .mission-item, .title-item { text-align: left; background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 10px; margin-bottom: 10px; font-size: 0.8em; }
+        .mission-desc { margin-bottom: 5px; }
+        .mission-progress-bar { width: 100%; height: 10px; background: var(--gauge-bg-color); border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+        .mission-progress-fill { height: 100%; background: var(--rarity-rare); }
+        .mission-reward { display: flex; justify-content: space-between; align-items: center; }
+        .mission-reward button { padding: 5px 10px; font-size: 0.9em; margin: 0; }
+        .title-item { cursor: pointer; }
+        .title-item.locked { color: #888; cursor: default; }
+        .title-item.selected { border-color: var(--player-color); box-shadow: 0 0 10px var(--player-color); }
+        .title-item .title-desc { font-size: 0.8em; color: #aaa; }
     </style>
 </head>
 <body>
@@ -87,20 +104,22 @@
         <canvas id="game-canvas"></canvas>
         <div id="main-menu-screen" class="screen-overlay">
             <h1>CHRONO BREAK</h1>
+            <p id="main-title-display"></p>
             <p class="shard-display">💎 0</p>
             <div class="main-menu-buttons">
                 <button id="start-game-button">START</button>
                 <button id="hangar-button">격납고</button>
                 <button id="shop-button">상점</button>
+                <button id="profile-button">프로필</button>
                 <button id="control-toggle-button">컨트롤: 키보드</button>
             </div>
         </div>
         <div id="hangar-screen" class="screen-overlay">
             <h1>격납고</h1>
             <p class="shard-display">💎 0</p>
-            <div id="hangar-content">
-                <div id="character-list-panel"></div>
-                <div id="right-panel">
+            <div class="content-panel">
+                <div id="character-list-panel" class="left-panel"></div>
+                <div id="right-panel" class="right-panel">
                     <div id="selected-char-details"></div>
                     <div id="skin-selection-container"></div>
                     <div id="upgrade-section"></div>
@@ -118,6 +137,18 @@
             <div class="bottom-panel-buttons">
                  <button id="shop-refresh-button">새로고침 (💎150)</button>
                 <button id="back-to-menu-from-shop-button">뒤로가기</button>
+            </div>
+        </div>
+        <div id="profile-screen" class="screen-overlay">
+            <h1>프로필</h1>
+            <div class="tab-buttons">
+                <button id="missions-tab-button" class="active">미션</button>
+                <button id="titles-tab-button">칭호</button>
+            </div>
+            <div id="missions-tab" class="tab-content active"></div>
+            <div id="titles-tab" class="tab-content"></div>
+            <div class="bottom-panel-buttons">
+                <button id="back-to-menu-from-profile-button">뒤로가기</button>
             </div>
         </div>
         <div id="top-hud" class="hud">
@@ -141,14 +172,16 @@
     // --- 1. 전역 변수 및 상수 초기화 ---
     const canvas = document.getElementById('game-canvas'), ctx = canvas.getContext('2d');
     const mainMenuScreen = document.getElementById('main-menu-screen'), gameOverScreen = document.getElementById('game-over-screen');
-    const hangarScreen = document.getElementById('hangar-screen'), shopScreen = document.getElementById('shop-screen');
+    const hangarScreen = document.getElementById('hangar-screen'), shopScreen = document.getElementById('shop-screen'), profileScreen = document.getElementById('profile-screen');
     const scoreEl = document.getElementById('score'), highScoreEl = document.getElementById('high-score'), lifeInfoEl = document.getElementById('life-info'), bombInfoEl = document.getElementById('bomb-info'), chronoGaugeBarEl = document.getElementById('chrono-gauge-bar');
-    const shardDisplays = document.querySelectorAll('.shard-display');
+    const shardDisplays = document.querySelectorAll('.shard-display'), mainTitleDisplay = document.getElementById('main-title-display');
     const charListPanel = document.getElementById('character-list-panel'), upgradeSection = document.getElementById('upgrade-section'), skinSelectionContainer = document.getElementById('skin-selection-container'), selectedCharDetailsEl = document.getElementById('selected-char-details');
     const charGachaButton = document.getElementById('char-gacha-button'), startGameButton = document.getElementById('start-game-button'), returnToMenuButton = document.getElementById('return-to-menu-button'), controlToggleButton = document.getElementById('control-toggle-button');
-    const hangarButton = document.getElementById('hangar-button'), shopButton = document.getElementById('shop-button'), shopRefreshButton = document.getElementById('shop-refresh-button');
-    const backToMenuFromHangarBtn = document.getElementById('back-to-menu-from-hangar-button'), backToMenuFromShopBtn = document.getElementById('back-to-menu-from-shop-button');
+    const hangarButton = document.getElementById('hangar-button'), shopButton = document.getElementById('shop-button'), profileButton = document.getElementById('profile-button'), shopRefreshButton = document.getElementById('shop-refresh-button');
+    const backToMenuFromHangarBtn = document.getElementById('back-to-menu-from-hangar-button'), backToMenuFromShopBtn = document.getElementById('back-to-menu-from-shop-button'), backToMenuFromProfileBtn = document.getElementById('back-to-menu-from-profile-button');
     const shopContentEl = document.getElementById('shop-content');
+    const missionsTab = document.getElementById('missions-tab'), titlesTab = document.getElementById('titles-tab');
+    const missionsTabBtn = document.getElementById('missions-tab-button'), titlesTabBtn = document.getElementById('titles-tab-button');
     const finalScoreEl = document.getElementById('final-score'), shardsEarnedEl = document.getElementById('shards-earned');
     const mobileChronoButton = document.getElementById('chrono-break-button'), mobileBombButton = document.getElementById('bomb-button');
     
@@ -161,6 +194,7 @@
     let chronoShards = 0, waveClearBonus = 0, bossKillBonus = 0;
     let selectedCharacterId = 'stinger';
     let dailyDeals = { date: null, items: [] };
+    let playerStats = {};
 
     const SKIN_RARITY = { default: 0, normal: 1, rare: 2, legendary: 3, mythic: 4 };
     const SKIN_PRICES = { normal: 2000, rare: 5000, legendary: 20000 };
@@ -187,17 +221,17 @@
     const SKIN_DATA = {};
     const ALL_CHAR_IDS = ['stinger', 'guardian', 'spectre', 'pulse', 'blade', 'nova', 'rift', 'aegis', 'berserker', 'tempest', 'phase', 'echo', 'comet', 'arbiter', 'sentry', 'conjuror'];
     
-    // --- FULL SKIN DATA POPULATION ---
     ALL_CHAR_IDS.forEach(id => {
+        const geom_L = SKIN_GEOMETRY[id+'_L'] ? id+'_L' : id;
+        const geom_M = SKIN_GEOMETRY[id+'_M'] ? id+'_M' : geom_L;
         SKIN_DATA[id] = {
             default:   { name: '기본', shipColor: '#cccccc', attackColor: '#ffffff', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
             normal:    { name: '커스텀', shipColor: '#9acd32', attackColor: '#ffffff', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
             rare:      { name: '크림슨', shipColor: '#dc143c', attackColor: '#ff6347', accentColor: '#ffffff', geometry: id, killEffect: 'default', hasTrail: false, hasSkillEffect: false },
-            legendary: { name: '레전더리', shipColor: '#ff8000', attackColor: '#ff8000', accentColor: '#ffff00', geometry: id+'_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false },
-            mythic:    { name: '신화', shipColor: '#ff40ff', attackColor: '#ff40ff', accentColor: '#ffffff', geometry: id+'_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
+            legendary: { name: '레전더리', shipColor: '#ff8000', attackColor: '#ff8000', accentColor: '#ffff00', geometry: geom_L, killEffect: 'firework', hasTrail: false, hasSkillEffect: false },
+            mythic:    { name: '신화', shipColor: '#ff40ff', attackColor: '#ff40ff', accentColor: '#ffffff', geometry: geom_M, killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
         };
     });
-    // Unique Legendary/Mythic names and colors
     SKIN_DATA.stinger.legendary = { name: '인페르노', shipColor: '#ff4500', attackColor: '#ff8c00', accentColor: '#ffff00', geometry: 'stinger_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.stinger.mythic = { name: '보이드리퍼', shipColor: '#9400d3', attackColor: '#ee82ee', accentColor: '#00ffff', geometry: 'stinger_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
     SKIN_DATA.guardian.legendary = { name: '골리앗', shipColor: '#a0522d', attackColor: '#cd853f', accentColor: '#f4a460', geometry: 'guardian_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
@@ -243,6 +277,30 @@
     characters = initializeCharacterData(characters);
 
     let upgrades = { power: { name: '시작 파워', level: 0, maxLevel: 3, cost: [1000, 3000, 7000] }, bombs: { name: '시작 폭탄', level: 0, maxLevel: 2, cost: [2000, 5000] }, gauge: { name: '게이지 효율', level: 0, maxLevel: 4, cost: [1500, 3500, 6000, 9000] }, magnet: { name: '아이템 자석', level: 0, maxLevel: 1, cost: [10000] } };
+
+    const MISSIONS = {
+        score10k: { desc: "한 게임에서 10,000점 달성하기", target: 10000, reward: 500, trackerKey: 'maxScore' },
+        score100k: { desc: "한 게임에서 100,000점 달성하기", target: 100000, reward: 2000, trackerKey: 'maxScore' },
+        kills100: { desc: "총 100기 적 격파하기", target: 100, reward: 250, trackerKey: 'totalKills' },
+        kills1000: { desc: "총 1,000기 적 격파하기", target: 1000, reward: 1000, trackerKey: 'totalKills' },
+        graze500: { desc: "총 500회 그레이즈하기", target: 500, reward: 750, trackerKey: 'totalGraze' },
+        wave10: { desc: "웨이브 10 도달하기", target: 10, reward: 1500, trackerKey: 'maxWave' },
+        shards5k: { desc: "총 5,000 샤드 획득하기", target: 5000, reward: 500, trackerKey: 'totalShardsEarned' },
+        shards20k: { desc: "총 20,000 샤드 획득하기", target: 20000, reward: 2000, trackerKey: 'totalShardsEarned' },
+        play10: { desc: "총 10회 플레이하기", target: 10, reward: 500, trackerKey: 'gamesPlayed' },
+        unlock5: { desc: "캐릭터 5종 해금하기", target: 5, reward: 1000, trackerKey: 'unlockedCharCount' },
+    };
+
+    const TITLES = {
+        rookie: { name: "신입 파일럿", desc: "게임을 시작하면 획득" },
+        scorer: { name: "스코어러", desc: "100,000점 달성 미션 완료", requiresMission: 'score100k' },
+        hunter: { name: "사냥꾼", desc: "1,000기 격파 미션 완료", requiresMission: 'kills1000' },
+        dancer: { name: "탄막 무용수", desc: "500회 그레이즈 미션 완료", requiresMission: 'graze500' },
+        veteran: { name: "베테랑", desc: "웨이브 10 도달 미션 완료", requiresMission: 'wave10' },
+        collector: { name: "수집가", desc: "캐릭터 5종 해금 미션 완료", requiresMission: 'unlock5' },
+        rich: { name: "시간 부자", desc: "20,000 샤드 획득 미션 완료", requiresMission: 'shards20k' },
+        chronoMaster: { name: "크로노 마스터", desc: "신화 스킨 획득", requiresMythic: true },
+    };
 
     // --- 2. 사운드 시스템 ---
     let audioContext; const audioBuffers = {};
@@ -291,8 +349,23 @@
                 this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x)); this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y));
             }
             this.shootCooldown -= deltaTime;
-            if (selectedCharacterId === 'nova') { if (!isMoving && this.shootCooldown <= 0) { this.chargeLevel = Math.min(this.chargeMax, this.chargeLevel + deltaTime); } else { if (this.chargeLevel >= this.chargeMax) { this.shoot(); } this.chargeLevel = 0; } }
-            if (this.shootCooldown <= 0 && !this.isShielding) { this.shoot(); }
+            
+            // NOVA LOGIC FIX
+            if (selectedCharacterId === 'nova') {
+                if (!isMoving) {
+                    this.chargeLevel = Math.min(this.chargeMax, this.chargeLevel + deltaTime);
+                } else {
+                    if (this.chargeLevel >= this.chargeMax) {
+                        this.shoot(); 
+                    }
+                    this.chargeLevel = 0;
+                }
+            }
+            
+            if (this.shootCooldown <= 0 && !this.isShielding && !(selectedCharacterId === 'nova' && !isMoving)) {
+                this.shoot();
+            }
+
             if (this.isInvincible) { this.invincibleTimer -= deltaTime; if (this.invincibleTimer <= 0) this.isInvincible = false; }
             const gaugeConsumption = 25 * (1 - (upgrades.gauge.level * 0.1));
             if ((input.keys.Shift || input.touch.chronoActive) && this.chronoGauge > 0) { if(gameSpeed === 1) playSound('chronoStart'); gameSpeed = 0.25; this.chronoGauge -= gaugeConsumption * deltaTime; if (this.chronoGauge < 0) this.chronoGauge = 0; } else { if(gameSpeed < 1) playSound('chronoEnd'); gameSpeed = 1; }
@@ -445,6 +518,9 @@
             if (this.type === 'barrier' && this.shieldHealth > 0 && !fromBehind) { this.shieldHealth -= damage; if(this.shieldHealth <= 0) createExplosion(this.x, this.y + this.size, '#00ffff', 20); return; }
             this.health -= damage;
             if (this.health <= 0) {
+                if (player) { // Update stats only if player is alive
+                    playerStats.totalKills++;
+                }
                 const scoreBonus = selectedCharacterId === 'blade' ? 1.5 : 1;
                 score += this.scoreValue * Math.floor(scoreMultiplier) * scoreBonus;
                 if (selectedCharacterId === 'pulse' && player) player.addChronoGauge(0.5);
@@ -552,19 +628,12 @@
     function checkCollisions() {
         for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'player') continue; const damage = 10 + player.power; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(b.x - e.x, b.y - e.y); if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { if (b.special.isPiercing) { if (b.hitEnemies.has(e)) continue; b.hitEnemies.add(e); } e.takeDamage(damage, b.y < e.y); if (!b.special.isPiercing && !b.special.isWave) { bullets.splice(i, 1); break; } } } }
         if (player && player.orbiters) { for (const orb of player.orbiters) { const damage = (5 + player.power) * 0.2; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(orb.x - e.x, orb.y - e.y); if (dist < e.size + orb.size) { e.takeDamage(damage); } } } }
-        if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
+        if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); playerStats.totalGraze++; } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
         for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
     function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
     function createExplosion(x, y, color, count, options) { for (let i = 0; i < count; i++) { particles.push(new Particle(x, y, color, 5, options)); } }
-    function createFireworkExplosion(x, y, color1, color2, count = 30) {
-        for (let i = 0; i < count; i++) {
-            const angle = Math.random() * Math.PI * 2;
-            const speed = Math.random() * 200 + 50;
-            const particleColor = Math.random() > 0.5 ? color1 : color2;
-            particles.push(new Particle(x, y, particleColor, 4, { speed: speed, lifespan: 1.5, fade: true, type: 'spark'}));
-        }
-    }
+    function createFireworkExplosion(x, y, color1, color2, count = 30) { for (let i = 0; i < count; i++) { const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 200 + 50; const particleColor = Math.random() > 0.5 ? color1 : color2; particles.push(new Particle(x, y, particleColor, 4, { speed: speed, lifespan: 1.5, fade: true, type: 'spark'})); } }
     let screenFlashTimer = 0; function createScreenFlash() { screenFlashTimer = 0.2; }
     
     function update(deltaTime) {
@@ -572,7 +641,6 @@
         lowHealthPulse += deltaTime * 5;
         if (screenShake > 0) screenShake = Math.max(0, screenShake - 30 * deltaTime);
         if (screenFlashTimer > 0) screenFlashTimer -= deltaTime;
-
         player.update(deltaTime, inputHandler);
         enemies.forEach(e => e.update(deltaTime));
         bullets.forEach(b => b.update(deltaTime));
@@ -580,17 +648,14 @@
         powerUps.forEach(p => p.update(deltaTime));
         turrets.forEach(t => t.update(deltaTime));
         allies.forEach(a => a.update(deltaTime));
-        
         checkCollisions();
         spawnEnemies(deltaTime);
-
         bullets = bullets.filter(b => b.x > -50 && b.x < canvas.width + 50 && b.y > -50 && b.y < canvas.height + 50 && (!b.special.lifespan || b.special.lifespan > 0));
         enemies = enemies.filter(e => e.health > 0);
         particles = particles.filter(p => p.lifespan > 0);
         powerUps = powerUps.filter(p => p.y < canvas.height + 20);
         turrets = turrets.filter(t => t.lifespan > 0);
         allies = allies.filter(a => a.lifespan > 0);
-
         if (scoreMultiplier > 1) { scoreMultiplier -= 0.05 * deltaTime; if (scoreMultiplier < 1) scoreMultiplier = 1; }
         backgroundStars.forEach(s => { s.y += s.speed * deltaTime * gameSpeed; if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; } });
     }
@@ -603,61 +668,112 @@
         ctx.globalAlpha = 1;
         if (screenFlashTimer > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${screenFlashTimer * 4})`; ctx.fillRect(0, 0, canvas.width, canvas.height); }
         if (player && player.skinRarity === 4 && gameSpeed < 1) { const grad = ctx.createRadialGradient(player.x, player.y, 50, player.x, player.y, canvas.width/2); grad.addColorStop(0, player.accentColor + '00'); grad.addColorStop(1, player.accentColor + '40'); ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width, canvas.height); }
-        
         if (gameState === 'playing' || gameState === 'gameOver') {
             powerUps.forEach(p => p.draw(ctx));
             turrets.forEach(t => t.draw(ctx));
             allies.forEach(a => a.draw(ctx));
-            if (player) {
-                player.draw(ctx);
-                if (player.orbiters) player.orbiters.forEach(o => o.draw(ctx));
-            }
+            if (player) { player.draw(ctx); if (player.orbiters) player.orbiters.forEach(o => o.draw(ctx)); }
             enemies.forEach(e => e.draw(ctx));
             bullets.forEach(b => b.draw(ctx));
             particles.forEach(p => p.draw(ctx));
         }
-
         if (player && player.lives <= 1 && !player.isInvincible) { const alpha = 0.3 + Math.sin(lowHealthPulse) * 0.2; ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`; ctx.fillRect(0, 0, canvas.width, canvas.height); }
         ctx.restore();
         updateInGameUI();
     }
     function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryTimer > 0 ? 'ON' : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; case 'sentry': specialText = `TURRET ${player.turretCooldown > 0 ? Math.ceil(player.turretCooldown) : 'RDY'}`; break; case 'conjuror': specialText = `SUMMON ${player.summonCooldown > 0 ? Math.ceil(player.summonCooldown) : 'RDY'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } }
     function gameLoop(timestamp) { if (!lastTime) lastTime = timestamp; const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000); lastTime = timestamp; if (gameState === 'playing') update(deltaTime); draw(); animationFrameId = requestAnimationFrame(gameLoop); }
-    function gameOver() { gameState = 'gameOver'; if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; } const scoreToShards = Math.floor(score / 500); const totalEarned = scoreToShards + waveClearBonus + bossKillBonus; chronoShards += totalEarned; if (score > highScore) highScore = score; const charData = characters[selectedCharacterId]; if(score > charData.highScore) charData.highScore = Math.floor(score); if(!charData.skins.mythic.unlocked && charData.highScore >= 1000000) { charData.skins.mythic.unlocked = true; setTimeout(() => alert(`🏆 ${charData.name} 신화 스킨 해금! 🏆\n1,000,000점 달성을 축하합니다!`), 500); } saveData(); finalScoreEl.textContent = `FINAL SCORE: ${Math.floor(score)}`; shardsEarnedEl.innerHTML = `💎 +${scoreToShards} (Score)<br>💎 +${waveClearBonus} (Wave)<br>💎 +${bossKillBonus} (Boss)<br>TOTAL: 💎 +${totalEarned}`; shardsEarnedEl.classList.add('animate'); setTimeout(() => shardsEarnedEl.classList.remove('animate'), 1000); draw(); gameOverScreen.style.display = 'flex'; }
+    function gameOver() {
+        gameState = 'gameOver';
+        if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; }
+        const scoreToShards = Math.floor(score / 500);
+        const totalEarned = scoreToShards + waveClearBonus + bossKillBonus;
+        chronoShards += totalEarned;
+        playerStats.totalShardsEarned += totalEarned;
+        playerStats.gamesPlayed++;
+        playerStats.maxScore = Math.max(playerStats.maxScore, Math.floor(score));
+        playerStats.maxWave = Math.max(playerStats.maxWave, wave);
+
+        if (score > highScore) highScore = score;
+        const charData = characters[selectedCharacterId];
+        if(score > charData.highScore) charData.highScore = Math.floor(score);
+        if(!charData.skins.mythic.unlocked && charData.highScore >= 1000000) { charData.skins.mythic.unlocked = true; setTimeout(() => alert(`🏆 ${charData.name} 신화 스킨 해금! 🏆\n1,000,000점 달성을 축하합니다!`), 500); }
+        
+        checkUnlocks();
+        saveData();
+
+        finalScoreEl.textContent = `FINAL SCORE: ${Math.floor(score)}`;
+        shardsEarnedEl.innerHTML = `💎 +${scoreToShards} (Score)<br>💎 +${waveClearBonus} (Wave)<br>💎 +${bossKillBonus} (Boss)<br>TOTAL: 💎 +${totalEarned}`;
+        shardsEarnedEl.classList.add('animate');
+        setTimeout(() => shardsEarnedEl.classList.remove('animate'), 1000);
+        draw();
+        gameOverScreen.style.display = 'flex';
+    }
     function resetGame() { score = 0; scoreMultiplier = 1; wave = 0; waveTimer = 0; gameSpeed = 1; waveClearBonus = 0; bossKillBonus = 0; screenShake = 0; enemies = []; bullets = []; particles = []; powerUps = []; turrets = []; allies = []; player = new Player(); gameState = 'playing'; }
-    function startOrRestartGame() { mainMenuScreen.style.display = 'none'; resetGame(); if (!animationFrameId) { lastTime = 0; animationFrameId = requestAnimationFrame(gameLoop); } }
+    function startOrRestartGame() {
+        mainMenuScreen.style.display = 'none';
+        const activeTitle = TITLES[playerStats.activeTitle];
+        if (activeTitle) {
+            const titleEl = document.createElement('p');
+            titleEl.textContent = `"${activeTitle.name}"`;
+            titleEl.style.position = 'absolute';
+            titleEl.style.top = '40%';
+            titleEl.style.fontSize = '1.5em';
+            titleEl.style.color = 'var(--rarity-legendary)';
+            titleEl.style.textShadow = '2px 2px 5px #000';
+            titleEl.style.zIndex = '100';
+            titleEl.style.animation = 'fade-out 2s forwards';
+            game-container.appendChild(titleEl);
+            setTimeout(() => titleEl.remove(), 2000);
+        }
+        resetGame();
+        if (!animationFrameId) { lastTime = 0; animationFrameId = requestAnimationFrame(gameLoop); }
+    }
 
     // --- 6. 데이터 관리 및 UI ---
-    function saveData() { localStorage.setItem('chronoBreakData_v9', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals })); }
+    function saveData() { localStorage.setItem('chronoBreakData_v10', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals, playerStats })); }
     function loadData() {
-        let data = JSON.parse(localStorage.getItem('chronoBreakData_v9'));
+        let data = JSON.parse(localStorage.getItem('chronoBreakData_v10'));
         if (!data) {
-            data = JSON.parse(localStorage.getItem('chronoBreakData_v8')) || JSON.parse(localStorage.getItem('chronoBreakData_v7'));
-            if (data && data.characters) {
-                const defaultCharacters = initializeCharacterData(characters);
+            data = JSON.parse(localStorage.getItem('chronoBreakData_v9')) || {};
+            const defaultCharacters = initializeCharacterData(characters);
+            if (data.characters) {
                 Object.keys(defaultCharacters).forEach(id => {
                     if (!data.characters[id]) { data.characters[id] = defaultCharacters[id]; }
                 });
                 data.characters = initializeCharacterData(data.characters);
+            } else {
+                data.characters = defaultCharacters;
             }
         }
 
-        if (data) {
-            highScore = data.highScore || 0;
-            chronoShards = data.chronoShards || 0;
-            controlMode = data.controlMode || 'keyboard';
-            dailyDeals = data.dailyDeals || { date: null, items: [] };
-            if (data.upgrades) { Object.keys(upgrades).forEach(key => { if(data.upgrades[key]) Object.assign(upgrades[key], data.upgrades[key]); }); }
-            if (data.characters) {
-                const loadedChars = initializeCharacterData(data.characters);
-                Object.keys(characters).forEach(id => {
-                    if (loadedChars[id]) { Object.assign(characters[id], loadedChars[id]); }
-                });
-            }
+        highScore = data.highScore || 0;
+        chronoShards = data.chronoShards || 0;
+        controlMode = data.controlMode || 'keyboard';
+        dailyDeals = data.dailyDeals || { date: null, items: [] };
+        upgrades = data.upgrades || upgrades;
+        if (data.characters) {
+            const loadedChars = initializeCharacterData(data.characters);
+            Object.keys(characters).forEach(id => {
+                if (loadedChars[id]) { Object.assign(characters[id], loadedChars[id]); }
+            });
         }
+        playerStats = data.playerStats || {
+            totalKills: 0, totalGraze: 0, maxScore: 0, maxWave: 0,
+            gamesPlayed: 0, totalShardsEarned: 0, unlockedCharCount: 0,
+            completedMissions: [], unlockedTitles: ['rookie'], activeTitle: 'rookie'
+        };
         saveData();
     }
-    function updateAllUI() { shardDisplays.forEach(el => el.textContent = `💎 ${chronoShards}`); updateHangarScreen(); updateShopScreen(); controlToggleButton.textContent = `컨트롤: ${controlMode === 'keyboard' ? '키보드' : '터치'}`; }
+    function updateAllUI() {
+        shardDisplays.forEach(el => el.textContent = `💎 ${chronoShards}`);
+        const activeTitle = TITLES[playerStats.activeTitle];
+        mainTitleDisplay.textContent = activeTitle ? `"${activeTitle.name}"` : "";
+        updateHangarScreen();
+        updateShopScreen();
+        updateProfileScreen();
+        controlToggleButton.textContent = `컨트롤: ${controlMode === 'keyboard' ? '키보드' : '터치'}`;
+    }
     function updateHangarScreen() {
         charListPanel.innerHTML = '';
         Object.keys(characters).forEach(id => { const char = characters[id]; const div = document.createElement('div'); div.className = 'char-portrait'; if (char.unlocked) { div.innerHTML = `<span class="char-icon" style="color:${SKIN_DATA[id].default.shipColor}">${char.icon}</span><div class="char-portrait-info"><span class="char-name">${char.name}</span><span class="char-highscore">HI: ${char.highScore}</span></div>`; div.onclick = () => { selectedCharacterId = id; updateHangarScreen(); }; if (id === selectedCharacterId) div.classList.add('selected'); } else { div.classList.add('locked'); div.innerHTML = `<span class="char-icon">?</span><div class="char-portrait-info"><span class="char-name">???</span></div>`; div.onclick = () => alert('캐릭터 뽑기에서 획득할 수 있습니다.'); } charListPanel.appendChild(div); });
@@ -671,112 +787,110 @@
     function updateShopScreen() {
         generateDailyDeals();
         shopContentEl.innerHTML = '';
-        if (dailyDeals.items.length === 0) {
-            shopContentEl.innerHTML = '<p>오늘의 상품이 모두 판매되었거나, 구매 가능한 스킨이 없습니다.</p>';
+        if (dailyDeals.items.length === 0) { shopContentEl.innerHTML = '<p>오늘의 상품이 모두 판매되었거나, 구매 가능한 스킨이 없습니다.</p>';
         } else {
             dailyDeals.items.forEach(item => {
-                const charData = characters[item.charId];
-                const skinData = charData.skins[item.skinId];
-                const skinInfo = SKIN_DATA[item.charId][item.skinId];
-                const isOwned = skinData.unlocked;
-                const price = SKIN_PRICES[item.skinId];
-
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'shop-item';
-                
-                const previewCanvas = document.createElement('canvas');
-                previewCanvas.className = 'skin-preview-canvas';
-                previewCanvas.width = 60; previewCanvas.height = 60;
+                const charData = characters[item.charId]; const skinData = charData.skins[item.skinId]; const skinInfo = SKIN_DATA[item.charId][item.skinId]; const isOwned = skinData.unlocked; const price = SKIN_PRICES[item.skinId];
+                const itemDiv = document.createElement('div'); itemDiv.className = 'shop-item';
+                const previewCanvas = document.createElement('canvas'); previewCanvas.className = 'skin-preview-canvas'; previewCanvas.width = 60; previewCanvas.height = 60;
                 drawPlayerPreview(previewCanvas, item.charId, item.skinId);
-                
-                const infoDiv = document.createElement('div');
-                infoDiv.className = 'shop-item-info';
-                infoDiv.innerHTML = `<div class="shop-item-name">${charData.name} - ${skinInfo.name}</div>
-                                <div class="shop-item-rarity-${item.skinId}">${item.skinId}</div>
-                                <div class="shop-item-price">💎 ${price}</div>`;
-
-                const buyButton = document.createElement('button');
-                buyButton.textContent = isOwned ? '보유중' : '구매';
-                buyButton.disabled = isOwned || chronoShards < price;
-                buyButton.onclick = () => buySkin(item.charId, item.skinId, price);
-
-                itemDiv.appendChild(previewCanvas);
-                itemDiv.appendChild(infoDiv);
-                itemDiv.appendChild(buyButton);
-                shopContentEl.appendChild(itemDiv);
+                const infoDiv = document.createElement('div'); infoDiv.className = 'shop-item-info';
+                infoDiv.innerHTML = `<div class="shop-item-name">${charData.name} - ${skinInfo.name}</div><div class="shop-item-rarity-${item.skinId}">${item.skinId}</div><div class="shop-item-price">💎 ${price}</div>`;
+                const buyButton = document.createElement('button'); buyButton.textContent = isOwned ? '보유중' : '구매'; buyButton.disabled = isOwned || chronoShards < price; buyButton.onclick = () => buySkin(item.charId, item.skinId, price);
+                itemDiv.appendChild(previewCanvas); itemDiv.appendChild(infoDiv); itemDiv.appendChild(buyButton); shopContentEl.appendChild(itemDiv);
             });
         }
-        const potentialSkins = getPotentialSkins();
-        shopRefreshButton.disabled = chronoShards < 150 || potentialSkins.length < 5;
+        const potentialSkins = getPotentialSkins(); shopRefreshButton.disabled = chronoShards < 150 || potentialSkins.length < 5;
     }
-    function getPotentialSkins() {
-        const potential = [];
-        Object.keys(characters).forEach(charId => {
-            if (characters[charId].unlocked) {
-                Object.keys(characters[charId].skins).forEach(skinId => {
-                    if (!characters[charId].skins[skinId].unlocked && SKIN_PRICES[skinId]) {
-                        potential.push({ charId, skinId });
-                    }
-                });
+    function updateProfileScreen() {
+        updateMissionsTab(); updateTitlesTab();
+    }
+    function updateMissionsTab() {
+        missionsTab.innerHTML = '';
+        playerStats.unlockedCharCount = Object.values(characters).filter(c => c.unlocked).length;
+        Object.keys(MISSIONS).forEach(id => {
+            const mission = MISSIONS[id];
+            const isCompleted = playerStats.completedMissions.includes(id);
+            const currentVal = playerStats[mission.trackerKey] || 0;
+            const progress = Math.min(currentVal / mission.target, 1);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'mission-item';
+            itemDiv.innerHTML = `<div class="mission-desc">${mission.desc}</div>
+                <div class="mission-progress-bar"><div class="mission-progress-fill" style="width: ${progress * 100}%"></div></div>
+                <div class="mission-reward">
+                    <span>${Math.floor(currentVal)} / ${mission.target}</span>
+                    <button id="claim-${id}" ${isCompleted || progress < 1 ? 'disabled' : ''}>보상 (💎${mission.reward})</button>
+                </div>`;
+            missionsTab.appendChild(itemDiv);
+            if (!isCompleted && progress >= 1) {
+                document.getElementById(`claim-${id}`).onclick = () => claimMissionReward(id);
             }
         });
-        return potential;
     }
-    function generateDailyDeals(forceRefresh = false) {
-        const today = new Date().toDateString();
-        if (dailyDeals.date === today && !forceRefresh) return;
-
-        const potentialSkins = getPotentialSkins();
-        
-        // Shuffle the array
-        for (let i = potentialSkins.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [potentialSkins[i], potentialSkins[j]] = [potentialSkins[j], potentialSkins[i]];
-        }
-        
-        const newDeals = potentialSkins.slice(0, 5);
-        dailyDeals = { date: today, items: newDeals };
-        saveData();
+    function updateTitlesTab() {
+        titlesTab.innerHTML = '';
+        Object.keys(TITLES).forEach(id => {
+            const title = TITLES[id];
+            const isUnlocked = playerStats.unlockedTitles.includes(id);
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'title-item';
+            if (isUnlocked) {
+                if(playerStats.activeTitle === id) itemDiv.classList.add('selected');
+                itemDiv.onclick = () => { playerStats.activeTitle = id; saveData(); updateAllUI(); };
+            } else {
+                itemDiv.classList.add('locked');
+            }
+            itemDiv.innerHTML = `<strong>${isUnlocked ? title.name : '???'}</strong><div class="title-desc">${title.desc}</div>`;
+            titlesTab.appendChild(itemDiv);
+        });
     }
-    function refreshShop() {
-        const cost = 150;
-        if (chronoShards >= cost) {
-            chronoShards -= cost;
-            playSound('itemGet');
-            generateDailyDeals(true); // Force refresh
-            updateAllUI();
-        } else {
-            alert(`샤드가 부족합니다. (필요: 💎${cost})`);
-        }
-    }
+    function getPotentialSkins() { const potential = []; Object.keys(characters).forEach(charId => { if (characters[charId].unlocked) { Object.keys(characters[charId].skins).forEach(skinId => { if (!characters[charId].skins[skinId].unlocked && SKIN_PRICES[skinId]) { potential.push({ charId, skinId }); } }); } }); return potential; }
+    function generateDailyDeals(forceRefresh = false) { const today = new Date().toDateString(); if (dailyDeals.date === today && !forceRefresh) return; const potentialSkins = getPotentialSkins(); for (let i = potentialSkins.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [potentialSkins[i], potentialSkins[j]] = [potentialSkins[j], potentialSkins[i]]; } const newDeals = potentialSkins.slice(0, 5); dailyDeals = { date: today, items: newDeals }; saveData(); }
+    function refreshShop() { const cost = 150; if (chronoShards >= cost) { chronoShards -= cost; playSound('itemGet'); generateDailyDeals(true); updateAllUI(); } else { alert(`샤드가 부족합니다. (필요: 💎${cost})`); } }
     function drawPlayerPreview(targetCanvas, charId, skinId) {
-        const pCtx = targetCanvas.getContext('2d');
-        pCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
-        
-        const skin = SKIN_DATA[charId][skinId];
-        const char = {
-            x: targetCanvas.width / 2, y: targetCanvas.height / 2,
-            size: 15, color: skin.shipColor,
-            geometry: SKIN_GEOMETRY[skin.geometry] || SKIN_GEOMETRY.default
-        };
-        
-        pCtx.fillStyle = char.color;
-        pCtx.beginPath();
-        char.geometry.forEach((p, i) => { const xPos = char.x + p.x * char.size; const yPos = char.y + p.y * char.size; if (i === 0) pCtx.moveTo(xPos, yPos); else pCtx.lineTo(xPos, yPos); });
-        pCtx.closePath();
-        pCtx.fill();
+        const pCtx = targetCanvas.getContext('2d'); pCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+        const skin = SKIN_DATA[charId][skinId]; const char = { x: targetCanvas.width / 2, y: targetCanvas.height / 2, size: 15, color: skin.shipColor, geometry: SKIN_GEOMETRY[skin.geometry] || SKIN_GEOMETRY.default };
+        pCtx.fillStyle = char.color; pCtx.beginPath(); char.geometry.forEach((p, i) => { const xPos = char.x + p.x * char.size; const yPos = char.y + p.y * char.size; if (i === 0) pCtx.moveTo(xPos, yPos); else pCtx.lineTo(xPos, yPos); }); pCtx.closePath(); pCtx.fill();
     }
     function buyUpgrade(id) { const upg = upgrades[id]; const cost = upg.cost[upg.level]; if (chronoShards >= cost && upg.level < upg.maxLevel) { chronoShards -= cost; upg.level++; playSound('itemGet'); saveData(); updateAllUI(); } }
     function buyCharacterGacha() { const cost = 1500; if (chronoShards >= cost) { const locked = Object.keys(characters).filter(id => !characters[id].unlocked); if (locked.length > 0) { chronoShards -= cost; const unlockedId = locked[Math.floor(Math.random() * locked.length)]; characters[unlockedId].unlocked = true; alert(`✨ [캐릭터 해금] ${characters[unlockedId].name} 획득! ✨`); playSound('itemGet', 1.0); saveData(); updateAllUI(); } else { alert('모든 캐릭터를 해금했습니다!'); } } else { alert(`샤드가 부족합니다. (필요: 💎${cost})`); } }
-    function buySkin(charId, skinId, price) {
-        if (chronoShards >= price) {
-            chronoShards -= price;
-            characters[charId].skins[skinId].unlocked = true;
-            alert(`✨ [스킨 구매] ${characters[charId].name} - ${SKIN_DATA[charId][skinId].name} 스킨을 구매했습니다! ✨`);
-            playSound('itemGet', 1.0);
+    function buySkin(charId, skinId, price) { if (chronoShards >= price) { chronoShards -= price; characters[charId].skins[skinId].unlocked = true; alert(`✨ [스킨 구매] ${characters[charId].name} - ${SKIN_DATA[charId][skinId].name} 스킨을 구매했습니다! ✨`); playSound('itemGet', 1.0); checkUnlocks(); saveData(); updateAllUI(); } }
+    function claimMissionReward(missionId) {
+        const mission = MISSIONS[missionId];
+        if (mission && !playerStats.completedMissions.includes(missionId)) {
+            chronoShards += mission.reward;
+            playerStats.completedMissions.push(missionId);
+            playSound('itemGet', 1.2);
+            alert(`미션 완료! 💎${mission.reward} 획득!`);
+            checkUnlocks();
             saveData();
             updateAllUI();
         }
+    }
+    function checkUnlocks() {
+        let newUnlock = false;
+        Object.keys(TITLES).forEach(id => {
+            if (!playerStats.unlockedTitles.includes(id)) {
+                const title = TITLES[id];
+                let shouldUnlock = false;
+                if (title.requiresMission) {
+                    if (playerStats.completedMissions.includes(title.requiresMission)) {
+                        shouldUnlock = true;
+                    }
+                } else if (title.requiresMythic) {
+                    if (Object.values(characters).some(c => c.skins.mythic.unlocked)) {
+                        shouldUnlock = true;
+                    }
+                }
+                if (shouldUnlock) {
+                    playerStats.unlockedTitles.push(id);
+                    alert(`칭호 획득: ${title.name}!`);
+                    newUnlock = true;
+                }
+            }
+        });
+        if (newUnlock) saveData();
     }
 
     // --- 7. 초기화 ---
@@ -799,9 +913,13 @@
         
         hangarButton.onclick = () => { mainMenuScreen.style.display = 'none'; hangarScreen.style.display = 'flex'; updateHangarScreen(); };
         shopButton.onclick = () => { mainMenuScreen.style.display = 'none'; shopScreen.style.display = 'flex'; updateShopScreen(); };
+        profileButton.onclick = () => { mainMenuScreen.style.display = 'none'; profileScreen.style.display = 'flex'; updateProfileScreen(); };
         shopRefreshButton.onclick = refreshShop;
         backToMenuFromHangarBtn.onclick = () => { hangarScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
         backToMenuFromShopBtn.onclick = () => { shopScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
+        backToMenuFromProfileBtn.onclick = () => { profileScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
+        missionsTabBtn.onclick = () => { missionsTab.classList.add('active'); titlesTab.classList.remove('active'); missionsTabBtn.classList.add('active'); titlesTabBtn.classList.remove('active'); };
+        titlesTabBtn.onclick = () => { missionsTab.classList.remove('active'); titlesTab.classList.add('active'); missionsTabBtn.classList.remove('active'); titlesTabBtn.classList.add('active'); };
 
         highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`;
     }
