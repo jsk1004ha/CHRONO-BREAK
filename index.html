@@ -15,12 +15,12 @@
             --enemy-bullet-color: #ff80ff;
             --powerup-p-color: #4dff4d; --powerup-b-color: #4da6ff; --powerup-c-color: #cc66ff; --powerup-s-color: #a9d4ff;
             --hud-color: #ffffff; --gauge-color: #00ffff; --gauge-bg-color: #33334d; --button-bg: rgba(255, 255, 255, 0.1); --button-border: rgba(255, 255, 255, 0.5); --shard-color: #a9d4ff;
-            --rarity-rare: #00aaff; --rarity-legendary: #ff8000; --rarity-mythic: #ff40ff;
+            --rarity-normal: #ffffff; --rarity-rare: #00aaff; --rarity-legendary: #ff8000; --rarity-mythic: #ff40ff;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html, body { width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-color); color: var(--hud-color); font-family: 'Press Start 2P',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Oxygen,Ubuntu,Cantarell,'Open Sans','Helvetica Neue',sans-serif; -webkit-tap-highlight-color: transparent; }
         #game-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; }
-        canvas { background-color: #000; border: 1px solid var(--button-border); touch-action: none; position: relative; z-index: 5; }
+        canvas#game-canvas { background-color: #000; border: 1px solid var(--button-border); touch-action: none; position: relative; z-index: 5; }
         .hud, .screen-overlay { text-shadow: 2px 2px 0px #000, -2px -2px 0px #000, 2px -2px 0px #000, -2px 2px 0px #000; }
         .hud { position: absolute; width: 100%; padding: 15px 20px; font-size: 1em; line-height: 1.4; pointer-events: none; z-index: 15; }
         #top-hud { top: 0; display: flex; justify-content: space-between; align-items: flex-start; }
@@ -32,22 +32,23 @@
         #chrono-break-button { left: 30px; }
         #bomb-button { right: 30px; }
         .mobile-control.active { background-color: rgba(0, 255, 255, 0.5); }
-        .screen-overlay { position: absolute; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 20; cursor: default; padding: 10px; }
-        .screen-overlay h1 { font-size: 2.5em; line-height: 1.2; margin-bottom: 10px; }
+        .screen-overlay { position: absolute; top:0; left:0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 20; cursor: default; padding: 10px; background: radial-gradient(ellipse at center, rgba(13, 13, 26, 0.95) 0%, rgba(13, 13, 26, 1) 100%); gap: 10px; justify-content: flex-start; padding-top: 3%; }
+        .screen-overlay h1 { font-size: 2.2em; line-height: 1.2; margin-bottom: 10px; text-shadow: 3px 3px 0px var(--player-color), -3px -3px 0px var(--player-color), 3px -3px 0px var(--player-color), -3px 3px 0px var(--player-color); }
         .screen-overlay p { font-size: 1em; margin: 5px 0; line-height: 1.5; }
         .screen-overlay button { padding: 10px 20px; font-size: 1em; font-weight: bold; color: var(--bg-color); background-color: var(--player-color); border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 0 15px var(--player-color); transition: all 0.1s; margin-top: 10px; font-family: 'Press Start 2P', cursive; }
         .screen-overlay button:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.2); }
         .screen-overlay button:active { transform: scale(0.95); }
         .screen-overlay button:disabled { background-color: #555; color: #888; cursor: not-allowed; box-shadow: none; }
-        #main-menu-screen { background: radial-gradient(ellipse at center, rgba(13, 13, 26, 0.95) 0%, rgba(13, 13, 26, 1) 100%); gap: 10px; justify-content: flex-start; padding-top: 3%; }
-        #main-menu-screen h1 { text-shadow: 3px 3px 0px var(--player-color), -3px -3px 0px var(--player-color), 3px -3px 0px var(--player-color), -3px 3px 0px var(--player-color); font-size: 2.2em; }
-        #game-over-screen { display: none; }
+        #main-menu-screen { display: flex; justify-content: center; gap: 20px; }
+        #game-over-screen, #hangar-screen, #shop-screen { display: none; }
         #game-over-screen h1 { text-shadow: 2px 2px 0px #ff0000, -2px -2px 0px #ff0000, 2px -2px 0px #ff0000, -2px 2px 0px #ff0000; }
-        #shard-display { color: var(--shard-color); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--button-border); }
+        .shard-display { color: var(--shard-color); font-size: 1.2em; font-weight: bold; margin-bottom: 10px; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--button-border); }
         #shards-earned.animate { animation: pop-in 0.5s ease-out; }
         @keyframes pop-in { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
-        #main-menu-content { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 550px; flex-grow: 1; gap: 10px; }
-        #main-panel { display: flex; width: 100%; gap: 10px; flex-grow: 1; min-height: 0; }
+        .main-menu-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; max-width: 400px; }
+        .main-menu-buttons button { padding: 15px 20px; font-size: 1.2em; width: 100%; }
+        /* Hangar Screen */
+        #hangar-content { display: flex; width: 100%; max-width: 600px; gap: 10px; flex-grow: 1; min-height: 0; }
         #character-list-panel { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 5px; flex-basis: 45%; }
         .char-portrait { width: 100%; height: 80px; border: 3px solid var(--button-border); border-radius: 10px; cursor: pointer; display: flex; justify-content: flex-start; align-items: center; transition: all 0.2s; padding: 10px; background: rgba(0,0,0,0.2); position: relative; gap: 10px; }
         .char-portrait.selected { border-color: var(--player-color); background: rgba(0, 255, 255, 0.1); box-shadow: 0 0 10px var(--player-color); }
@@ -57,48 +58,75 @@
         .char-icon { font-size: 2em; }
         .char-name { font-weight: bold; font-size: 0.8em; }
         .char-highscore { font-size: 0.6em; color: var(--enemy-color-2); }
-        #right-panel { flex-basis: 55%; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 10px; }
-        #selected-char-details { text-align: center; font-size: 0.7em; line-height: 1.3; border-bottom: 1px solid var(--button-border); padding-bottom: 8px; }
-        #skin-selection-container { display: flex; justify-content: center; gap: 8px; }
+        #right-panel { flex-basis: 55%; display: flex; flex-direction: column; gap: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 10px; overflow-y: auto; }
+        #selected-char-details { text-align: left; font-size: 0.7em; line-height: 1.3; border-bottom: 1px solid var(--button-border); padding-bottom: 8px; }
+        #selected-char-details h3 { font-size: 1.2em; text-align: center; margin-bottom: 5px; }
+        #selected-char-details p { margin-left: 5px; }
+        #skin-selection-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 5px; }
         .skin-swatch { width: 25px; height: 25px; border: 2px solid var(--button-border); border-radius: 5px; cursor: pointer; transition: all 0.2s; }
         .skin-swatch.selected { transform: scale(1.2); box-shadow: 0 0 10px #fff; }
         .skin-swatch.locked { background: repeating-linear-gradient(45deg, #333, #333 4px, #444 4px, #444 8px); cursor: not-allowed; }
-        .skin-swatch.rarity-rare { border-color: var(--rarity-rare); } .skin-swatch.rarity-legendary { border-color: var(--rarity-legendary); } .skin-swatch.rarity-mythic { border-color: var(--rarity-mythic); }
-        #upgrade-section { display: flex; flex-direction: column; gap: 8px; font-size: 0.7em; }
+        .skin-swatch.rarity-normal { border-color: var(--rarity-normal); } .skin-swatch.rarity-rare { border-color: var(--rarity-rare); } .skin-swatch.rarity-legendary { border-color: var(--rarity-legendary); } .skin-swatch.rarity-mythic { border-color: var(--rarity-mythic); }
+        #upgrade-section { display: flex; flex-direction: column; gap: 8px; font-size: 0.7em; margin-top: 10px; }
         .upgrade-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .upgrade-row button { padding: 5px 8px; font-size: 0.9em; margin-top: 0; }
-        #bottom-buttons { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        .gacha-buttons { display: flex; justify-content: center; gap: 10px; }
-        .gacha-buttons button { flex-grow: 1; font-size: 0.8em; }
-        #start-game-button { padding: 12px 20px; font-size: 1.2em; width: 100%; }
-        #control-toggle-button { font-size: 0.7em; padding: 8px 12px; margin-top: 0; background-color: #444; }
+        .bottom-panel-buttons { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 600px; margin-top: auto; padding-top: 10px; }
+        /* Shop Screen */
+        #shop-content { display: flex; flex-direction: column; gap: 15px; width: 100%; max-width: 450px; align-items: center; }
+        .shop-item { background: rgba(0,0,0,0.2); border: 1px solid var(--button-border); border-radius: 10px; padding: 15px; width: 100%; display: flex; align-items: center; gap: 15px; }
+        .skin-preview-canvas { background-color: #000; border-radius: 5px; }
+        .shop-item-info { flex-grow: 1; text-align: left; }
+        .shop-item-name { font-size: 0.9em; }
+        .shop-item-rarity-normal { color: var(--rarity-normal); } .shop-item-rarity-rare { color: var(--rarity-rare); } .shop-item-rarity-legendary { color: var(--rarity-legendary); }
+        .shop-item-price { font-size: 0.8em; color: var(--shard-color); }
+        .shop-item button { font-size: 0.8em; padding: 8px 12px; margin: 0; }
     </style>
 </head>
 <body>
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
+
+        <!-- Main Menu Screen -->
         <div id="main-menu-screen" class="screen-overlay">
             <h1>CHRONO BREAK</h1>
-            <div id="main-menu-content">
-                <p id="shard-display">💎 0</p>
-                <div id="main-panel">
-                    <div id="character-list-panel"></div>
-                    <div id="right-panel">
-                        <div id="selected-char-details"></div>
-                        <div id="skin-selection-container"></div>
-                        <div id="upgrade-section"></div>
-                    </div>
-                </div>
-                <div id="bottom-buttons">
-                    <div class="gacha-buttons">
-                        <button id="char-gacha-button">캐릭터 뽑기 (💎1500)</button>
-                        <button id="skin-gacha-button">스킨 뽑기 (💎10000)</button>
-                    </div>
-                    <button id="control-toggle-button">컨트롤: 키보드</button>
-                    <button id="start-game-button">START</button>
-                </div>
+            <p class="shard-display">💎 0</p>
+            <div class="main-menu-buttons">
+                <button id="start-game-button">START</button>
+                <button id="hangar-button">격납고</button>
+                <button id="shop-button">상점</button>
+                <button id="control-toggle-button">컨트롤: 키보드</button>
             </div>
         </div>
+
+        <!-- Hangar Screen -->
+        <div id="hangar-screen" class="screen-overlay">
+            <h1>격납고</h1>
+            <p class="shard-display">💎 0</p>
+            <div id="hangar-content">
+                <div id="character-list-panel"></div>
+                <div id="right-panel">
+                    <div id="selected-char-details"></div>
+                    <div id="skin-selection-container"></div>
+                    <div id="upgrade-section"></div>
+                </div>
+            </div>
+            <div class="bottom-panel-buttons">
+                <button id="char-gacha-button">캐릭터 뽑기 (💎1500)</button>
+                <button id="back-to-menu-from-hangar-button">뒤로가기</button>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shop-screen" class="screen-overlay">
+            <h1>오늘의 상점</h1>
+            <p class="shard-display">💎 0</p>
+            <div id="shop-content"></div>
+            <div class="bottom-panel-buttons">
+                <button id="back-to-menu-from-shop-button">뒤로가기</button>
+            </div>
+        </div>
+
+        <!-- In-Game HUD -->
         <div id="top-hud" class="hud">
             <div><span id="score">SCORE: 0</span><br><span id="high-score">HIGH: 0</span></div>
             <div style="text-align: right;"><span id="life-info"></span><br><span id="bomb-info"></span></div>
@@ -108,6 +136,8 @@
         </div>
         <div id="chrono-break-button" class="mobile-control">BREAK</div>
         <div id="bomb-button" class="mobile-control">BOMB</div>
+
+        <!-- Game Over Screen -->
         <div id="game-over-screen" class="screen-overlay">
             <h1>GAME OVER</h1>
             <p id="final-score"></p>
@@ -120,9 +150,14 @@
     // --- 1. 전역 변수 및 상수 초기화 ---
     const canvas = document.getElementById('game-canvas'), ctx = canvas.getContext('2d');
     const mainMenuScreen = document.getElementById('main-menu-screen'), gameOverScreen = document.getElementById('game-over-screen');
+    const hangarScreen = document.getElementById('hangar-screen'), shopScreen = document.getElementById('shop-screen');
     const scoreEl = document.getElementById('score'), highScoreEl = document.getElementById('high-score'), lifeInfoEl = document.getElementById('life-info'), bombInfoEl = document.getElementById('bomb-info'), chronoGaugeBarEl = document.getElementById('chrono-gauge-bar');
-    const shardDisplay = document.getElementById('shard-display'), charListPanel = document.getElementById('character-list-panel'), upgradeSection = document.getElementById('upgrade-section'), skinSelectionContainer = document.getElementById('skin-selection-container'), selectedCharDetailsEl = document.getElementById('selected-char-details');
-    const charGachaButton = document.getElementById('char-gacha-button'), skinGachaButton = document.getElementById('skin-gacha-button'), startGameButton = document.getElementById('start-game-button'), returnToMenuButton = document.getElementById('return-to-menu-button'), controlToggleButton = document.getElementById('control-toggle-button');
+    const shardDisplays = document.querySelectorAll('.shard-display');
+    const charListPanel = document.getElementById('character-list-panel'), upgradeSection = document.getElementById('upgrade-section'), skinSelectionContainer = document.getElementById('skin-selection-container'), selectedCharDetailsEl = document.getElementById('selected-char-details');
+    const charGachaButton = document.getElementById('char-gacha-button'), startGameButton = document.getElementById('start-game-button'), returnToMenuButton = document.getElementById('return-to-menu-button'), controlToggleButton = document.getElementById('control-toggle-button');
+    const hangarButton = document.getElementById('hangar-button'), shopButton = document.getElementById('shop-button');
+    const backToMenuFromHangarBtn = document.getElementById('back-to-menu-from-hangar-button'), backToMenuFromShopBtn = document.getElementById('back-to-menu-from-shop-button');
+    const shopContentEl = document.getElementById('shop-content');
     const finalScoreEl = document.getElementById('final-score'), shardsEarnedEl = document.getElementById('shards-earned');
     const mobileChronoButton = document.getElementById('chrono-break-button'), mobileBombButton = document.getElementById('bomb-button');
     let gameState = 'mainMenu', controlMode = 'keyboard', gameSpeed = 1, lastTime = 0, animationFrameId = null;
@@ -132,12 +167,14 @@
     const colors = {};
     let chronoShards = 0, waveClearBonus = 0, bossKillBonus = 0;
     let selectedCharacterId = 'stinger';
+    let dailyDeals = { date: null, items: [] };
 
     const SKIN_COLORS = {
         stinger: { normal: '#00ffff', rare: '#00ff88', legendary: '#7df9ff', mythic: '#ffd700', accent: '#f0f' }, guardian: { normal: '#4da6ff', rare: '#8a2be2', legendary: '#e0ffff', mythic: '#1e90ff', accent: '#ffd700' }, spectre: { normal: '#9d74e0', rare: '#ff69b4', legendary: '#f0f0f0', mythic: '#4b0082', accent: '#ff00ff' }, pulse: { normal: '#ffc800', rare: '#ff4500', legendary: '#ffff00', mythic: '#dc143c', accent: '#ff8c00' }, blade: { normal: '#f0f', rare: '#ff0000', legendary: '#ff4500', mythic: '#ffffff', accent: '#ff0000' }, nova: { normal: '#ff7f50', rare: '#ff1493', legendary: '#ffdead', mythic: '#f4a460', accent: '#ff4500' }, rift: { normal: '#20b2aa', rare: '#00ced1', legendary: '#afeeee', mythic: '#7fffd4', accent: '#ffffff' }, aegis: { normal: '#b0c4de', rare: '#778899', legendary: '#f8f8ff', mythic: '#e6e6fa', accent: '#00ffff' }, berserker: { normal: '#dc143c', rare: '#ff6347', legendary: '#ff0000', mythic: '#8b0000', accent: '#ffff00' }, tempest: { normal: '#4682b4', rare: '#87ceeb', legendary: '#add8e6', mythic: '#b0e0e6', accent: '#ffffff' },
         phase: { normal: '#f0e68c', rare: '#ffd700', legendary: '#fafad2', mythic: '#fffacd', accent: '#ffffff' }, echo: { normal: '#dda0dd', rare: '#da70d6', legendary: '#ee82ee', mythic: '#ff00ff', accent: '#ffffff' }, comet: { normal: '#add8e6', rare: '#87cefa', legendary: '#00bfff', mythic: '#1e90ff', accent: '#ffffff' },
     };
     const SKIN_RARITY = { normal: 0, rare: 1, legendary: 2, mythic: 3 };
+    const SKIN_PRICES = { normal: 2000, rare: 5000, legendary: 20000 };
     const SKIN_GEOMETRY = {
         default: [{x:0,y:-1},{x:-0.66,y:0.5},{x:0.66,y:0.5}],
         stinger: [{x:0,y:-1.2},{x:-0.3,y:0.4},{x:-0.8,y:0.2},{x:0.8,y:0.2},{x:0.3,y:0.4}], blade: [{x:0,y:-1.1},{x:-1,y:0.6},{x:0,y:0.3},{x:1,y:0.6}], guardian: [{x:0,y:-1},{x:-0.8,y:-0.2},{x:-0.8,y:0.6},{x:0.8,y:0.6},{x:0.8,y:-0.2}],
@@ -145,8 +182,19 @@
     };
 
     let characters = {
-        stinger: { name: '스팅어', icon: '▶', unlocked: true, desc: '집중형 표준 샷' }, guardian: { name: '가디언', icon: '❖', unlocked: false, desc: '광역 샷, 폭탄+1' }, spectre: { name: '스펙터', icon: '⬟', unlocked: false, desc: '유도탄, 게이지+' }, pulse: { name: '펄스', icon: '◎', unlocked: false, desc: '근접 파동, 처치 시 게이지 회복' }, blade: { name: '블레이드', icon: '▲', unlocked: false, desc: '관통 공격, 생명 1, 점수 2배' }, nova: { name: '✧', unlocked: false, desc: '차지 레이저 발사' }, rift: { name: '↯', unlocked: false, desc: '폭탄 대신 블링크' }, aegis: { name: '🛡️', unlocked: false, desc: '총알 흡수 방어막' }, berserker: { name: '🔥', unlocked: false, desc: '체력 낮을수록 공속 증가' }, tempest: { name: '🌀', unlocked: false, desc: '공전하는 오브젝트 발사' },
-        phase: { name: '페이즈', icon: '»', unlocked: false, desc: '짧은 무적 대시' }, echo: { name: '에코', icon: '↺', unlocked: false, desc: '타이밍 맞춰 패링/반격' }, comet: { name: '코멧', icon: '☄️', unlocked: false, desc: '초고속 기동, 체력 -1' },
+        stinger:   { name: '스팅어', icon: '▶', unlocked: true,  attackDesc: '전방으로 집중되는 표준형 샷을 발사합니다.', specialDesc: '강력한 폭탄으로 화면의 적과 탄을 제거합니다.' },
+        guardian:  { name: '가디언', icon: '❖', unlocked: false, attackDesc: '넓은 부채꼴 모양으로 샷을 발사합니다.', specialDesc: '시작 폭탄이 1개 더 많습니다.' },
+        spectre:   { name: '스펙터', icon: '⬟', unlocked: false, attackDesc: '가장 가까운 적을 추적하는 유도탄을 발사합니다.', specialDesc: '강력한 폭탄으로 화면의 적과 탄을 제거합니다.' },
+        pulse:     { name: '펄스',   icon: '◎', unlocked: false, attackDesc: '기체 주변에 근접 방사형 파동을 일으킵니다.', specialDesc: '적 처치 시 크로노 게이지를 소량 회복합니다.' },
+        blade:     { name: '블레이드', icon: '▲', unlocked: false, attackDesc: '적을 관통하는 강력한 블레이드를 발사합니다.', specialDesc: '생명이 1개뿐이지만, 획득 점수가 1.5배가 됩니다.' },
+        nova:      { name: '노바',   icon: '✧', unlocked: false, attackDesc: '정지 상태에서 공격을 충전하여 강력한 레이저를 발사합니다.', specialDesc: '강력한 폭탄으로 화면의 적과 탄을 제거합니다.' },
+        rift:      { name: '리프트', icon: '↯', unlocked: false, attackDesc: '표준형 샷을 발사합니다.', specialDesc: '폭탄 대신 지정 방향으로 순간이동(블링크)합니다.' },
+        aegis:     { name: '이지스', icon: '🛡️', unlocked: false, attackDesc: '표준형 샷을 발사합니다.', specialDesc: '폭탄 대신 전방의 적탄을 흡수하는 방어막을 생성합니다.' },
+        berserker: { name: '버서커', icon: '🔥', unlocked: false, attackDesc: '체력이 낮을수록 공격 속도가 빨라집니다.', specialDesc: '강력한 폭탄으로 화면의 적과 탄을 제거합니다.' },
+        tempest:   { name: '템페스트', icon: '🌀', unlocked: false, attackDesc: '기체 주위를 공전하며 공격하는 오브젝트를 소환합니다.', specialDesc: '강력한 폭탄으로 화면의 적과 탄을 제거합니다.' },
+        phase:     { name: '페이즈', icon: '»', unlocked: false, attackDesc: '표준형 샷을 발사합니다.', specialDesc: '폭탄 대신 짧은 거리를 무적 상태로 대시합니다.' },
+        echo:      { name: '에코',   icon: '↺', unlocked: false, attackDesc: '표준형 샷을 발사합니다.', specialDesc: '폭탄 대신 타이밍에 맞춰 적의 공격을 쳐내고 반격합니다.' },
+        comet:     { name: '코멧',   icon: '☄️', unlocked: false, attackDesc: '표준형 샷을 발사합니다.', specialDesc: '이동 속도가 매우 빠르지만, 시작 체력이 1개 적습니다.' },
     };
     Object.keys(characters).forEach(id => {
         characters[id].highScore = 0; characters[id].selectedSkin = 'normal'; characters[id].skins = { normal: { unlocked: true }, rare: { unlocked: false }, legendary: { unlocked: false }, mythic: { unlocked: false } };
@@ -170,7 +218,7 @@
             const specialBombChars = ['rift', 'aegis', 'phase', 'echo']; const initialBombs = (specialBombChars.includes(selectedCharacterId)) ? 0 : 3 + upgrades.bombs.level + (selectedCharacterId === 'guardian' ? 1 : 0);
             this.bombs = Math.min(5, initialBombs);
             // 특수 능력 초기화
-            if (selectedCharacterId === 'comet') this.speed *= 1.5;
+            if (selectedCharacterId === 'comet') this.speed *= 1.3; // BALANCE: 1.5x -> 1.3x
             this.chargeLevel = 0; this.chargeMax = 1.5; // Nova
             this.blinkCooldown = 0; this.blinkMaxCooldown = 5; // Rift
             this.dashCooldown = 0; this.dashMaxCooldown = 1.5; // Phase
@@ -194,7 +242,6 @@
             const gaugeConsumption = 25 * (1 - (upgrades.gauge.level * 0.1));
             if ((input.keys.Shift || input.touch.chronoActive) && this.chronoGauge > 0) { if(gameSpeed === 1) playSound('chronoStart'); gameSpeed = 0.25; this.chronoGauge -= gaugeConsumption * deltaTime; if (this.chronoGauge < 0) this.chronoGauge = 0; } else { if(gameSpeed < 1) playSound('chronoEnd'); gameSpeed = 1; }
             
-            // 특수 능력 업데이트
             const bombPressed = input.keys.x || input.touch.bombPressed;
             if(bombPressed) { input.keys.x = false; input.touch.bombPressed = false; }
             if (selectedCharacterId === 'rift') { this.blinkCooldown = Math.max(0, this.blinkCooldown - deltaTime); if (bombPressed && this.blinkCooldown <= 0) this.useBlink(isMoving ? {x: moveX, y: moveY} : null); }
@@ -234,7 +281,7 @@
             }
         }
         takeHit() { if (this.isInvincible) return; if (this.isParrying) { this.parryPower++; return; } if (this.isShielding) return; playSound('playerHit'); screenShake = 15; this.lives--; this.power = Math.max(1, this.power - 1); if (selectedCharacterId === 'tempest') this.orbiters.pop(); this.isInvincible = true; this.invincibleTimer = 2; createExplosion(this.x, this.y, this.color, 40); if (this.lives < 0) { gameOver(); } }
-        addChronoGauge(amount) { const multiplier = selectedCharacterId === 'spectre' ? 1.5 : 1; const lateGamePenalty = Math.max(0.3, 1 - (wave * 0.05)); this.chronoGauge = Math.min(this.chronoGaugeMax, this.chronoGauge + amount * multiplier * lateGamePenalty); if (this.skinRarity === 3) { for(let i=0; i<3; i++) particles.push(new Particle(this.x, this.y, this.accentColor, 3, { type: 'spark' })); } }
+        addChronoGauge(amount) { const lateGamePenalty = Math.max(0.3, 1 - (wave * 0.05)); this.chronoGauge = Math.min(this.chronoGaugeMax, this.chronoGauge + amount * lateGamePenalty); if (this.skinRarity === 3) { for(let i=0; i<3; i++) particles.push(new Particle(this.x, this.y, this.accentColor, 3, { type: 'spark' })); } }
         useBomb() { if (this.bombs <= 0) return; this.bombs--; playSound('explosion', 1.0); this.isInvincible = true; this.invincibleTimer = 1.5; bullets = bullets.filter(b => b.owner !== 'enemy'); enemies.forEach(e => e.takeDamage(50)); createScreenFlash(); }
         useBlink(direction) { playSound('blink'); this.blinkCooldown = this.blinkMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.3; const blinkDist = 100; createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); if(direction) { this.x += direction.x * blinkDist; this.y += direction.y * blinkDist; } else { this.y -= blinkDist; } this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x)); this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y)); createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); }
         useDash(moveX, moveY) { playSound('blink', 0.5); this.dashCooldown = this.dashMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.2; const dashDist = 60; createExplosion(this.x, this.y, this.color, 15, { type: 'warp', speed: 300 }); let dirX = moveX, dirY = moveY; if (dirX === 0 && dirY === 0) dirY = -1; const mag = Math.hypot(dirX, dirY); this.x += (dirX/mag) * dashDist; this.y += (dirY/mag) * dashDist; }
@@ -288,7 +335,6 @@
                 if(this.shootTimer <= 0) this.shoot();
                 if (this.patternTimer >= this.patternDuration) {
                     this.patternTimer = 0;
-                    const patterns = ['crossfire', 'weave', 'sunburst', 'ricochet', 'desperate'];
                     const healthRatio = this.health / this.maxHealth;
                     if (healthRatio < 0.2) this.pattern = 'desperate';
                     else if (healthRatio < 0.4) this.pattern = 'ricochet';
@@ -335,8 +381,9 @@
             if (this.type === 'barrier' && this.shieldHealth > 0 && !fromBehind) { this.shieldHealth -= damage; if(this.shieldHealth <= 0) createExplosion(this.x, this.y + this.size, '#00ffff', 20); return; }
             this.health -= damage;
             if (this.health <= 0) {
-                const scoreBonus = selectedCharacterId === 'blade' ? 2 : 1; score += this.scoreValue * Math.floor(scoreMultiplier) * scoreBonus;
-                if (selectedCharacterId === 'pulse' && player) player.addChronoGauge(1);
+                const scoreBonus = selectedCharacterId === 'blade' ? 1.5 : 1; // BALANCE: 2x -> 1.5x
+                score += this.scoreValue * Math.floor(scoreMultiplier) * scoreBonus;
+                if (selectedCharacterId === 'pulse' && player) player.addChronoGauge(0.5); // BALANCE: 1 -> 0.5
                 if (this.type === 'boss') bossKillBonus += 250;
                 if (player && player.skinRarity >= 2) { createExplosion(this.x, this.y, player.accentColor, 35, { type: 'nova', secondaryColor: player.color }); }
                 else { createExplosion(this.x, this.y, this.color, 20); }
@@ -363,35 +410,131 @@
     function checkCollisions() {
         for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'player') continue; const damage = b.special.isOrbiter ? (5 + player.power) * 0.2 : 10 + player.power; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(b.x - e.x, b.y - e.y); if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { if (b.special.isPiercing) { if (b.hitEnemies.has(e)) continue; b.hitEnemies.add(e); } e.takeDamage(damage, b.y < e.y); if (!b.special.isPiercing && !b.special.isWave && !b.special.isOrbiter) { bullets.splice(i, 1); break; } } } }
         if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
-        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); updateMainMenu(); break; } powerUps.splice(i, 1); } } }
+        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
     function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
     function createExplosion(x, y, color, count, options) { for (let i = 0; i < count; i++) { particles.push(new Particle(x, y, color, 5, options)); } }
     let screenFlashTimer = 0; function createScreenFlash() { screenFlashTimer = 0.2; }
     function update(deltaTime) { if (gameState !== 'playing' || !player) return; lowHealthPulse += deltaTime * 5; if (screenShake > 0) screenShake = Math.max(0, screenShake - 30 * deltaTime); if (screenFlashTimer > 0) screenFlashTimer -= deltaTime; player.update(deltaTime, inputHandler); enemies.forEach(e => e.update(deltaTime)); bullets.forEach(b => b.update(deltaTime)); if (player && player.orbiters) player.orbiters.forEach((orb, i) => orb.update(deltaTime, player, i, player.orbiters.length)); particles.forEach(p => p.update(deltaTime)); powerUps.forEach(p => p.update(deltaTime)); checkCollisions(); spawnEnemies(deltaTime); bullets = bullets.filter(b => b.x > -50 && b.x < canvas.width + 50 && b.y > -50 && b.y < canvas.height + 50 && (!b.special.lifespan || b.special.lifespan > 0)); enemies = enemies.filter(e => e.health > 0); particles = particles.filter(p => p.lifespan > 0); powerUps = powerUps.filter(p => p.y < canvas.height + 20); if (scoreMultiplier > 1) { scoreMultiplier -= 0.05 * deltaTime; if (scoreMultiplier < 1) scoreMultiplier = 1; } backgroundStars.forEach(s => { s.y += s.speed * deltaTime * gameSpeed; if (s.y > canvas.height) { s.y = 0; s.x = Math.random() * canvas.width; } }); }
-    function draw() { ctx.save(); if (screenShake > 0) { const shakeX = (Math.random() - 0.5) * screenShake; const shakeY = (Math.random() - 0.5) * screenShake; ctx.translate(shakeX, shakeY); } ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff'; backgroundStars.forEach(s => { ctx.globalAlpha = s.opacity; ctx.fillRect(s.x, s.y, s.size, s.size); }); ctx.globalAlpha = 1; if (screenFlashTimer > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${screenFlashTimer * 4})`; ctx.fillRect(0, 0, canvas.width, canvas.height); } if (player && player.skinRarity === 3 && gameSpeed < 1) { const grad = ctx.createRadialGradient(player.x, player.y, 50, player.x, player.y, canvas.width/2); grad.addColorStop(0, player.accentColor + '00'); grad.addColorStop(1, player.accentColor + '40'); ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width, canvas.height); } if (player && (gameState === 'playing' || gameState === 'gameOver')) { powerUps.forEach(p => p.draw(ctx)); player.draw(ctx); if (player.orbiters) player.orbiters.forEach(o => o.draw(ctx)); enemies.forEach(e => e.draw(ctx)); bullets.forEach(b => b.draw(ctx)); particles.forEach(p => p.draw(ctx)); } if (player && player.lives <= 1 && !player.isInvincible) { const alpha = 0.3 + Math.sin(lowHealthPulse) * 0.2; ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`; ctx.fillRect(0, 0, canvas.width, canvas.height); } ctx.restore(); updateUI(); }
-    function updateUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryTimer > 0 ? 'ON' : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; } }
+    function draw() { ctx.save(); if (screenShake > 0) { const shakeX = (Math.random() - 0.5) * screenShake; const shakeY = (Math.random() - 0.5) * screenShake; ctx.translate(shakeX, shakeY); } ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#fff'; backgroundStars.forEach(s => { ctx.globalAlpha = s.opacity; ctx.fillRect(s.x, s.y, s.size, s.size); }); ctx.globalAlpha = 1; if (screenFlashTimer > 0) { ctx.fillStyle = `rgba(255, 255, 255, ${screenFlashTimer * 4})`; ctx.fillRect(0, 0, canvas.width, canvas.height); } if (player && player.skinRarity === 3 && gameSpeed < 1) { const grad = ctx.createRadialGradient(player.x, player.y, 50, player.x, player.y, canvas.width/2); grad.addColorStop(0, player.accentColor + '00'); grad.addColorStop(1, player.accentColor + '40'); ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width, canvas.height); } if (player && (gameState === 'playing' || gameState === 'gameOver')) { powerUps.forEach(p => p.draw(ctx)); player.draw(ctx); if (player.orbiters) player.orbiters.forEach(o => o.draw(ctx)); enemies.forEach(e => e.draw(ctx)); bullets.forEach(b => b.draw(ctx)); particles.forEach(p => p.draw(ctx)); } if (player && player.lives <= 1 && !player.isInvincible) { const alpha = 0.3 + Math.sin(lowHealthPulse) * 0.2; ctx.fillStyle = `rgba(255, 0, 0, ${alpha})`; ctx.fillRect(0, 0, canvas.width, canvas.height); } ctx.restore(); updateInGameUI(); }
+    function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryTimer > 0 ? 'ON' : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } } // BUG FIX: Added chrono gauge update
     function gameLoop(timestamp) { if (!lastTime) lastTime = timestamp; const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000); lastTime = timestamp; if (gameState === 'playing') update(deltaTime); draw(); animationFrameId = requestAnimationFrame(gameLoop); }
     function gameOver() { gameState = 'gameOver'; if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; } const scoreToShards = Math.floor(score / 500); const totalEarned = scoreToShards + waveClearBonus + bossKillBonus; chronoShards += totalEarned; if (score > highScore) highScore = score; const charData = characters[selectedCharacterId]; if(score > charData.highScore) charData.highScore = Math.floor(score); if(!charData.skins.mythic.unlocked && charData.highScore >= 1000000) { charData.skins.mythic.unlocked = true; setTimeout(() => alert(`🏆 ${charData.name} 신화 스킨 해금! 🏆\n1,000,000점 달성을 축하합니다!`), 500); } saveData(); finalScoreEl.textContent = `FINAL SCORE: ${Math.floor(score)}`; shardsEarnedEl.innerHTML = `💎 +${scoreToShards} (Score)<br>💎 +${waveClearBonus} (Wave)<br>💎 +${bossKillBonus} (Boss)<br>TOTAL: 💎 +${totalEarned}`; shardsEarnedEl.classList.add('animate'); setTimeout(() => shardsEarnedEl.classList.remove('animate'), 1000); draw(); gameOverScreen.style.display = 'flex'; }
     function resetGame() { score = 0; scoreMultiplier = 1; wave = 0; waveTimer = 0; gameSpeed = 1; waveClearBonus = 0; bossKillBonus = 0; screenShake = 0; enemies = []; bullets = []; particles = []; powerUps = []; player = new Player(); gameState = 'playing'; }
     function startOrRestartGame() { mainMenuScreen.style.display = 'none'; resetGame(); if (!animationFrameId) { lastTime = 0; animationFrameId = requestAnimationFrame(gameLoop); } }
 
     // --- 6. 데이터 관리 및 UI ---
-    function saveData() { localStorage.setItem('chronoBreakData_v5', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode })); }
-    function loadData() { const data = JSON.parse(localStorage.getItem('chronoBreakData_v5')); if (data) { highScore = data.highScore || 0; chronoShards = data.chronoShards || 0; controlMode = data.controlMode || 'keyboard'; if (data.upgrades) { Object.keys(upgrades).forEach(key => { if(data.upgrades[key]) Object.assign(upgrades[key], data.upgrades[key]); }); } if (data.characters) { Object.keys(characters).forEach(id => { if (data.characters[id]) { Object.assign(characters[id], data.characters[id]); } }); } } }
-    function updateMainMenu() {
-        shardDisplay.textContent = `💎 ${chronoShards}`; charListPanel.innerHTML = '';
-        Object.keys(characters).forEach(id => { const char = characters[id]; const div = document.createElement('div'); div.className = 'char-portrait'; if (char.unlocked) { div.innerHTML = `<span class="char-icon" style="color:${SKIN_COLORS[id]['normal']}">${char.icon}</span><div class="char-portrait-info"><span class="char-name">${char.name}</span><span class="char-highscore">HI: ${char.highScore}</span></div>`; div.onclick = () => { selectedCharacterId = id; updateMainMenu(); }; if (id === selectedCharacterId) div.classList.add('selected'); } else { div.classList.add('locked'); div.innerHTML = `<span class="char-icon">?</span><div class="char-portrait-info"><span class="char-name">???</span></div>`; div.onclick = () => alert('캐릭터 뽑기에서 획득할 수 있습니다.'); } charListPanel.appendChild(div); });
-        const selectedCharData = characters[selectedCharacterId]; selectedCharDetailsEl.innerHTML = `<strong>${selectedCharData.name}</strong><br>${selectedCharData.desc}`; skinSelectionContainer.innerHTML = '';
-        Object.keys(selectedCharData.skins).forEach(skinId => { const skinData = selectedCharData.skins[skinId]; const swatch = document.createElement('div'); swatch.className = `skin-swatch rarity-${skinId}`; swatch.style.backgroundColor = SKIN_COLORS[selectedCharacterId][skinId]; if (skinData.unlocked) { if (skinId === selectedCharData.selectedSkin) swatch.classList.add('selected'); swatch.onclick = () => { selectedCharData.selectedSkin = skinId; saveData(); updateMainMenu(); }; } else { swatch.classList.add('locked'); } skinSelectionContainer.appendChild(swatch); });
+    function saveData() { localStorage.setItem('chronoBreakData_v6', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals })); }
+    function loadData() { const data = JSON.parse(localStorage.getItem('chronoBreakData_v6')); if (data) { highScore = data.highScore || 0; chronoShards = data.chronoShards || 0; controlMode = data.controlMode || 'keyboard'; dailyDeals = data.dailyDeals || { date: null, items: [] }; if (data.upgrades) { Object.keys(upgrades).forEach(key => { if(data.upgrades[key]) Object.assign(upgrades[key], data.upgrades[key]); }); } if (data.characters) { Object.keys(characters).forEach(id => { if (data.characters[id]) { Object.assign(characters[id], data.characters[id]); } }); } } }
+    function updateAllUI() { shardDisplays.forEach(el => el.textContent = `💎 ${chronoShards}`); updateHangarScreen(); updateShopScreen(); controlToggleButton.textContent = `컨트롤: ${controlMode === 'keyboard' ? '키보드' : '터치'}`; }
+    function updateHangarScreen() {
+        charListPanel.innerHTML = '';
+        Object.keys(characters).forEach(id => { const char = characters[id]; const div = document.createElement('div'); div.className = 'char-portrait'; if (char.unlocked) { div.innerHTML = `<span class="char-icon" style="color:${SKIN_COLORS[id]['normal']}">${char.icon}</span><div class="char-portrait-info"><span class="char-name">${char.name}</span><span class="char-highscore">HI: ${char.highScore}</span></div>`; div.onclick = () => { selectedCharacterId = id; updateHangarScreen(); }; if (id === selectedCharacterId) div.classList.add('selected'); } else { div.classList.add('locked'); div.innerHTML = `<span class="char-icon">?</span><div class="char-portrait-info"><span class="char-name">???</span></div>`; div.onclick = () => alert('캐릭터 뽑기에서 획득할 수 있습니다.'); } charListPanel.appendChild(div); });
+        const selectedCharData = characters[selectedCharacterId];
+        selectedCharDetailsEl.innerHTML = `<h3>${selectedCharData.name}</h3><p><b>공격:</b> ${selectedCharData.attackDesc}</p><p><b>특성:</b> ${selectedCharData.specialDesc}</p>`;
+        skinSelectionContainer.innerHTML = '';
+        Object.keys(selectedCharData.skins).forEach(skinId => { const skinData = selectedCharData.skins[skinId]; const swatch = document.createElement('div'); swatch.className = `skin-swatch rarity-${skinId}`; swatch.style.backgroundColor = SKIN_COLORS[selectedCharacterId][skinId]; if (skinData.unlocked) { if (skinId === selectedCharData.selectedSkin) swatch.classList.add('selected'); swatch.onclick = () => { selectedCharData.selectedSkin = skinId; saveData(); updateHangarScreen(); }; } else { swatch.classList.add('locked'); } skinSelectionContainer.appendChild(swatch); });
         upgradeSection.innerHTML = ''; Object.keys(upgrades).forEach(id => { const upg = upgrades[id]; const cost = upg.level < upg.maxLevel ? upg.cost[upg.level] : 'MAX'; const row = document.createElement('div'); row.className = 'upgrade-row'; row.innerHTML = `<span>${upg.name} (Lv.${upg.level})</span>`; const btn = document.createElement('button'); btn.textContent = `UP (💎${cost})`; btn.disabled = upg.level >= upg.maxLevel || chronoShards < cost; btn.onclick = () => buyUpgrade(id); row.appendChild(btn); upgradeSection.appendChild(row); });
         const lockedChars = Object.values(characters).filter(c => !c.unlocked); charGachaButton.disabled = chronoShards < 1500 || lockedChars.length === 0;
-        const lockedSkins = Object.values(characters).flatMap(c => c.unlocked ? Object.keys(c.skins).filter(s => !c.skins[s].unlocked && s !== 'mythic' && s !== 'normal') : []); skinGachaButton.disabled = chronoShards < 10000 || lockedSkins.length === 0;
-        controlToggleButton.textContent = `컨트롤: ${controlMode === 'keyboard' ? '키보드' : '터치'}`;
     }
-    function buyUpgrade(id) { const upg = upgrades[id]; const cost = upg.cost[upg.level]; if (chronoShards >= cost && upg.level < upg.maxLevel) { chronoShards -= cost; upg.level++; playSound('itemGet'); saveData(); updateMainMenu(); } }
-    function buyCharacterGacha() { const cost = 1500; if (chronoShards >= cost) { const locked = Object.keys(characters).filter(id => !characters[id].unlocked); if (locked.length > 0) { chronoShards -= cost; const unlockedId = locked[Math.floor(Math.random() * locked.length)]; characters[unlockedId].unlocked = true; alert(`✨ [캐릭터 해금] ${characters[unlockedId].name} 획득! ✨`); playSound('itemGet', 1.0); saveData(); updateMainMenu(); } else { alert('모든 캐릭터를 해금했습니다!'); } } else { alert(`샤드가 부족합니다. (필요: 💎${cost})`); } }
-    function buySkinGacha() { const cost = 10000; if (chronoShards >= cost) { const availableSkins = []; Object.keys(characters).forEach(charId => { const char = characters[charId]; if (char.unlocked) { Object.keys(char.skins).forEach(skinId => { if (skinId !== 'normal' && skinId !== 'mythic' && !char.skins[skinId].unlocked) { availableSkins.push({ charId, skinId }); } }); } }); if (availableSkins.length > 0) { chronoShards -= cost; const { charId, skinId } = availableSkins[Math.floor(Math.random() * availableSkins.length)]; characters[charId].skins[skinId].unlocked = true; const skinRarityName = skinId.charAt(0).toUpperCase() + skinId.slice(1); alert(`✨ [${skinRarityName}] ${characters[charId].name} 스킨 획득! ✨`); playSound('itemGet', 1.0); saveData(); updateMainMenu(); } else { alert('더 이상 뽑을 수 있는 스킨이 없습니다!'); } } else { alert(`샤드가 부족합니다. (필요: 💎${cost})`); } }
+    function updateShopScreen() {
+        generateDailyDeals();
+        shopContentEl.innerHTML = '';
+        if (dailyDeals.items.length === 0) {
+            shopContentEl.innerHTML = '<p>오늘의 상품이 모두 판매되었거나, 구매 가능한 스킨이 없습니다.</p>';
+            return;
+        }
+        dailyDeals.items.forEach(item => {
+            const charData = characters[item.charId];
+            const skinData = charData.skins[item.skinId];
+            const isOwned = skinData.unlocked;
+            const price = SKIN_PRICES[item.skinId];
+
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'shop-item';
+            
+            const previewCanvas = document.createElement('canvas');
+            previewCanvas.className = 'skin-preview-canvas';
+            previewCanvas.width = 60; previewCanvas.height = 60;
+            drawPlayerPreview(previewCanvas, item.charId, item.skinId);
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'shop-item-info';
+            infoDiv.innerHTML = `<div class="shop-item-name">${charData.name} - ${item.skinId.charAt(0).toUpperCase() + item.skinId.slice(1)}</div>
+                               <div class="shop-item-rarity-${item.skinId}">${item.skinId}</div>
+                               <div class="shop-item-price">💎 ${price}</div>`;
+
+            const buyButton = document.createElement('button');
+            buyButton.textContent = isOwned ? '보유중' : '구매';
+            buyButton.disabled = isOwned || chronoShards < price;
+            buyButton.onclick = () => buySkin(item.charId, item.skinId, price);
+
+            itemDiv.appendChild(previewCanvas);
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(buyButton);
+            shopContentEl.appendChild(itemDiv);
+        });
+    }
+    function generateDailyDeals() {
+        const today = new Date().toDateString();
+        if (dailyDeals.date === today) return;
+
+        const potentialSkins = { normal: [], rare: [], legendary: [] };
+        Object.keys(characters).forEach(charId => {
+            if (characters[charId].unlocked) {
+                Object.keys(characters[charId].skins).forEach(skinId => {
+                    if (!characters[charId].skins[skinId].unlocked && SKIN_PRICES[skinId]) {
+                        potentialSkins[skinId]?.push({ charId, skinId });
+                    }
+                });
+            }
+        });
+        
+        const newDeals = [];
+        ['normal', 'rare', 'legendary'].forEach(rarity => {
+            if (potentialSkins[rarity].length > 0) {
+                const deal = potentialSkins[rarity][Math.floor(Math.random() * potentialSkins[rarity].length)];
+                newDeals.push(deal);
+            }
+        });
+
+        dailyDeals = { date: today, items: newDeals };
+        saveData();
+    }
+    function drawPlayerPreview(targetCanvas, charId, skinId) {
+        const pCtx = targetCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, targetCanvas.width, targetCanvas.height);
+        
+        const char = {
+            x: targetCanvas.width / 2, y: targetCanvas.height / 2,
+            size: 15, color: SKIN_COLORS[charId][skinId],
+            skinRarity: SKIN_RARITY[skinId]
+        };
+        
+        const geometry = (char.skinRarity >= 2 && SKIN_GEOMETRY[charId]) ? SKIN_GEOMETRY[charId] : SKIN_GEOMETRY.default;
+        pCtx.fillStyle = char.color;
+        pCtx.beginPath();
+        geometry.forEach((p, i) => {
+            const xPos = char.x + p.x * char.size;
+            const yPos = char.y + p.y * char.size;
+            if (i === 0) pCtx.moveTo(xPos, yPos);
+            else pCtx.lineTo(xPos, yPos);
+        });
+        pCtx.closePath();
+        pCtx.fill();
+    }
+    function buyUpgrade(id) { const upg = upgrades[id]; const cost = upg.cost[upg.level]; if (chronoShards >= cost && upg.level < upg.maxLevel) { chronoShards -= cost; upg.level++; playSound('itemGet'); saveData(); updateAllUI(); } }
+    function buyCharacterGacha() { const cost = 1500; if (chronoShards >= cost) { const locked = Object.keys(characters).filter(id => !characters[id].unlocked); if (locked.length > 0) { chronoShards -= cost; const unlockedId = locked[Math.floor(Math.random() * locked.length)]; characters[unlockedId].unlocked = true; alert(`✨ [캐릭터 해금] ${characters[unlockedId].name} 획득! ✨`); playSound('itemGet', 1.0); saveData(); updateAllUI(); } else { alert('모든 캐릭터를 해금했습니다!'); } } else { alert(`샤드가 부족합니다. (필요: 💎${cost})`); } }
+    function buySkin(charId, skinId, price) {
+        if (chronoShards >= price) {
+            chronoShards -= price;
+            characters[charId].skins[skinId].unlocked = true;
+            alert(`✨ [스킨 구매] ${characters[charId].name} - ${skinId} 스킨을 구매했습니다! ✨`);
+            playSound('itemGet', 1.0);
+            saveData();
+            updateAllUI();
+        }
+    }
 
     // --- 7. 초기화 ---
     function init() {
@@ -401,12 +544,19 @@
         colors.enemy1 = rootStyles.getPropertyValue('--enemy-color-1').trim(); colors.enemy2 = rootStyles.getPropertyValue('--enemy-color-2').trim(); colors.dasher = rootStyles.getPropertyValue('--enemy-dasher-color').trim(); colors.weaver = rootStyles.getPropertyValue('--enemy-weaver-color').trim(); colors.kamikaze = rootStyles.getPropertyValue('--enemy-kamikaze-color').trim(); colors.boss = rootStyles.getPropertyValue('--boss-color').trim(); colors.enemyBullet = rootStyles.getPropertyValue('--enemy-bullet-color').trim();
         colors.powerupP = rootStyles.getPropertyValue('--powerup-p-color').trim(); colors.powerupB = rootStyles.getPropertyValue('--powerup-b-color').trim(); colors.powerupC = rootStyles.getPropertyValue('--powerup-c-color').trim(); colors.powerupS = rootStyles.getPropertyValue('--powerup-s-color').trim();
         colors.sentinel = rootStyles.getPropertyValue('--enemy-sentinel-color').trim(); colors.bulwark = rootStyles.getPropertyValue('--enemy-bulwark-color').trim(); colors.barrier = rootStyles.getPropertyValue('--enemy-barrier-color').trim();
-        loadData(); updateMainMenu(); initAudio();
+        loadData(); updateAllUI(); initAudio();
+        
+        // --- Event Listeners ---
         startGameButton.onclick = async () => { if (audioContext && audioContext.state === 'suspended') { await audioContext.resume(); } inputHandler.setup(); startOrRestartGame(); };
         charGachaButton.onclick = buyCharacterGacha;
-        skinGachaButton.onclick = buySkinGacha;
-        controlToggleButton.onclick = () => { controlMode = (controlMode === 'keyboard') ? 'touch' : 'keyboard'; saveData(); updateMainMenu(); };
-        returnToMenuButton.onclick = () => { gameOverScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; updateMainMenu(); };
+        controlToggleButton.onclick = () => { controlMode = (controlMode === 'keyboard') ? 'touch' : 'keyboard'; saveData(); updateAllUI(); };
+        returnToMenuButton.onclick = () => { gameOverScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; updateAllUI(); };
+        
+        hangarButton.onclick = () => { mainMenuScreen.style.display = 'none'; hangarScreen.style.display = 'flex'; updateHangarScreen(); };
+        shopButton.onclick = () => { mainMenuScreen.style.display = 'none'; shopScreen.style.display = 'flex'; updateShopScreen(); };
+        backToMenuFromHangarBtn.onclick = () => { hangarScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
+        backToMenuFromShopBtn.onclick = () => { shopScreen.style.display = 'none'; mainMenuScreen.style.display = 'flex'; };
+
         highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`;
     }
     window.addEventListener('load', init);
