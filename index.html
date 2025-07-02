@@ -419,6 +419,7 @@
             if (selectedCharacterId === 'berserker') { this.shootCooldown *= (0.5 + 0.5 * (this.lives / 3)); } // BALANCE: Nerfed
             else if (selectedCharacterId === 'spectre') { this.shootCooldown = 0.35; }
             else if (selectedCharacterId === 'arbiter') { this.shootCooldown = 0.4; }
+            else if (selectedCharacterId === 'pulse') { this.shootCooldown = 0.6; }
             playSound('shoot', 0.3);
             switch (selectedCharacterId) {
                 case 'tempest': return;
