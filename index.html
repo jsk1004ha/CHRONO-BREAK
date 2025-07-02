@@ -171,7 +171,7 @@
 
     <script>
     // --- 1. 전역 변수 및 상수 초기화 ---
-    const gameContainer = document.getElementById('game-container'); // BUG FIX: Define gameContainer
+    const gameContainer = document.getElementById('game-container');
     const canvas = document.getElementById('game-canvas'), ctx = canvas.getContext('2d');
     const mainMenuScreen = document.getElementById('main-menu-screen'), gameOverScreen = document.getElementById('game-over-screen');
     const hangarScreen = document.getElementById('hangar-screen'), shopScreen = document.getElementById('shop-screen'), profileScreen = document.getElementById('profile-screen');
@@ -234,36 +234,47 @@
             mythic:    { name: '신화', shipColor: '#ff40ff', attackColor: '#ff40ff', accentColor: '#ffffff', geometry: geom_M, killEffect: 'firework', hasTrail: true, hasSkillEffect: true },
         };
     });
+    // Unique Legendary/Mythic names and colors
     SKIN_DATA.stinger.legendary = { name: '인페르노', shipColor: '#ff4500', attackColor: '#ff8c00', accentColor: '#ffff00', geometry: 'stinger_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.stinger.mythic = { name: '보이드리퍼', shipColor: '#9400d3', attackColor: '#ee82ee', accentColor: '#00ffff', geometry: 'stinger_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
     SKIN_DATA.guardian.legendary = { name: '골리앗', shipColor: '#a0522d', attackColor: '#cd853f', accentColor: '#f4a460', geometry: 'guardian_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.guardian.mythic = { name: '성채', shipColor: '#dcdcdc', attackColor: '#ffffff', accentColor: '#ffd700', geometry: 'guardian_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
     SKIN_DATA.spectre.legendary = { name: '팬텀', shipColor: '#e6e6fa', attackColor: '#dda0dd', accentColor: '#ffffff', geometry: 'spectre_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.spectre.mythic = { name: '밴시', shipColor: '#00ced1', attackColor: '#48d1cc', accentColor: '#f0ffff', geometry: 'spectre_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.pulse.legendary = { name: '라이트닝 로드', shipColor: '#ffd700', attackColor: '#ffff00', accentColor: '#ffffff', geometry: 'pulse_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.blade.legendary = { name: '무라마사', shipColor: '#b22222', attackColor: '#ff3333', accentColor: '#ffffff', geometry: 'blade_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.blade.mythic = { name: '엑스칼리버', shipColor: '#ffd700', attackColor: '#fffacd', accentColor: '#ffffff', geometry: 'blade_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
     SKIN_DATA.nova.legendary = { name: '태양 작렬', shipColor: '#ff8c00', attackColor: '#ffa500', accentColor: '#ff4500', geometry: 'nova_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.nova.mythic = { name: '초신성', shipColor: '#4169e1', attackColor: '#87cefa', accentColor: '#ffffff', geometry: 'nova_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
+    SKIN_DATA.rift.legendary = { name: '차원 절단기', shipColor: '#8a2be2', attackColor: '#9932cc', accentColor: '#da70d6', geometry: 'rift_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.aegis.legendary = { name: '성기사', shipColor: '#f5deb3', attackColor: '#d2b48c', accentColor: '#ffd700', geometry: 'aegis_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.berserker.legendary = { name: '화산', shipColor: '#8b0000', attackColor: '#ff4500', accentColor: '#ff0000', geometry: 'berserker_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.tempest.legendary = { name: '허리케인', shipColor: '#4682b4', attackColor: '#87ceeb', accentColor: '#ffffff', geometry: 'tempest_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.phase.legendary = { name: '미라지', shipColor: '#fafad2', attackColor: '#eee8aa', accentColor: '#ffd700', geometry: 'phase_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.echo.legendary = { name: '크로노 워처', shipColor: '#2f4f4f', attackColor: '#008080', accentColor: '#00ffff', geometry: 'echo_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.comet.legendary = { name: '유성', shipColor: '#00bfff', attackColor: '#1e90ff', accentColor: '#add8e6', geometry: 'comet_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+    SKIN_DATA.arbiter.legendary = { name: '집행자', shipColor: '#708090', attackColor: '#778899', accentColor: '#b0c4de', geometry: 'arbiter_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.sentry.legendary = { name: '요새', shipColor: '#696969', attackColor: '#a9a9a9', accentColor: '#d3d3d3', geometry: 'sentry_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
     SKIN_DATA.sentry.mythic = { name: '최종 방어선', shipColor: '#f0e68c', attackColor: '#ffd700', accentColor: '#ffffff', geometry: 'sentry_M', killEffect: 'firework', hasTrail: true, hasSkillEffect: true };
-    
+    SKIN_DATA.conjuror.legendary = { name: '대마법사', shipColor: '#483d8b', attackColor: '#9370db', accentColor: '#e6e6fa', geometry: 'conjuror_L', killEffect: 'firework', hasTrail: false, hasSkillEffect: false };
+
     let characters = {
         stinger:   { name: '스팅어', icon: '▶', unlocked: true,  attackDesc: '전방 집중형 표준 샷', specialDesc: '전체 화면 폭탄' },
         guardian:  { name: '가디언', icon: '❖', unlocked: false, attackDesc: '광역 부채꼴 샷', specialDesc: '시작 폭탄 +1' },
         spectre:   { name: '스펙터', icon: '⬟', unlocked: false, attackDesc: '유도탄 발사', specialDesc: '전체 화면 폭탄' },
         pulse:     { name: '펄스',   icon: '◎', unlocked: false, attackDesc: '근접 방사형 파동', specialDesc: '적 처치 시 게이지 회복' },
         blade:     { name: '블레이드', icon: '▲', unlocked: false, attackDesc: '관통형 블레이드', specialDesc: '생명 1, 점수 1.5배' },
-        nova:      { name: '노바',   icon: '✧', unlocked: false, attackDesc: '차지 레이저 (총알 소거)', specialDesc: '전체 화면 폭탄' },
-        rift:      { name: '리프트', icon: '↯', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 블링크 (광역 피해)' },
-        aegis:     { name: '이지스', icon: '🛡️', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 방어막 (흡수 비례 반격)' },
+        nova:      { name: '노바',   icon: '✧', unlocked: false, attackDesc: '차지 레이저', specialDesc: '전체 화면 폭탄' },
+        rift:      { name: '리프트', icon: '↯', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 블링크' },
+        aegis:     { name: '이지스', icon: '🛡️', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 방어막' },
         berserker: { name: '버서커', icon: '🔥', unlocked: false, attackDesc: '체력 비례 공속 증가', specialDesc: '전체 화면 폭탄' },
         tempest:   { name: '템페스트', icon: '🌀', unlocked: false, attackDesc: '공전 오브젝트', specialDesc: '전체 화면 폭탄' },
-        phase:     { name: '페이즈', icon: '»', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 무적 대시 (광역 피해)' },
-        echo:      { name: '에코',   icon: '↺', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 패링/반격 (총알 소거)' },
+        phase:     { name: '페이즈', icon: '»', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 무적 대시' },
+        echo:      { name: '에코',   icon: '↺', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 패링/반격' },
         comet:     { name: '코멧',   icon: '☄️', unlocked: false, attackDesc: '표준형 샷', specialDesc: '초고속 기동, 체력 -1' },
         arbiter:   { name: '아비터', icon: '▒', unlocked: false, attackDesc: '근거리 샷건', specialDesc: '전체 화면 폭탄' },
-        sentry:    { name: '센트리', icon: 'T', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 터렛 설치 (관통탄)' },
-        conjuror:  { name: '컨저러', icon: '⁂', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 아군 소환 (유도탄/총알 소거)' },
+        sentry:    { name: '센트리', icon: 'T', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 터렛 설치' },
+        conjuror:  { name: '컨저러', icon: '⁂', unlocked: false, attackDesc: '표준형 샷', specialDesc: '특수: 아군 소환' },
     };
     
     function initializeCharacterData(charObject) {
@@ -335,6 +346,7 @@
             this.chargeLevel = 0; this.chargeMax = 1.5;
             this.blinkCooldown = 0; this.blinkMaxCooldown = 5;
             this.dashCooldown = 0; this.dashMaxCooldown = 1.5;
+            this.parryCooldown = 0; this.parryMaxCooldown = 2.0; // ECHO BALANCE
             this.isParrying = false; this.parryTimer = 0; this.parryPower = 0;
             this.orbiters = []; this.orbiterCooldown = 0;
             this.isShielding = false; this.shieldTimer = 0; this.shieldPower = 0;
@@ -376,10 +388,11 @@
             
             this.turretCooldown = Math.max(0, this.turretCooldown - deltaTime);
             this.summonCooldown = Math.max(0, this.summonCooldown - deltaTime);
+            this.parryCooldown = Math.max(0, this.parryCooldown - deltaTime);
 
             if (selectedCharacterId === 'rift') { this.blinkCooldown = Math.max(0, this.blinkCooldown - deltaTime); if (bombPressed && this.blinkCooldown <= 0) this.useBlink(isMoving ? {x: moveX, y: moveY} : null); }
-            else if (selectedCharacterId === 'phase') { this.dashCooldown = Math.max(0, this.dashCooldown - deltaTime); if (bombPressed && this.dashCooldown <= 0) this.useDash(); }
-            else if (selectedCharacterId === 'echo') { this.parryTimer = Math.max(0, this.parryTimer - deltaTime); if(this.isParrying && this.parryTimer <= 0) this.releaseParry(); if (bombPressed && !this.isParrying) this.activateParry(); }
+            else if (selectedCharacterId === 'phase') { this.dashCooldown = Math.max(0, this.dashCooldown - deltaTime); if (bombPressed && this.dashCooldown <= 0) this.useDash(moveX, moveY); }
+            else if (selectedCharacterId === 'echo') { this.parryTimer = Math.max(0, this.parryTimer - deltaTime); if(this.isParrying && this.parryTimer <= 0) this.releaseParry(); if (bombPressed && !this.isParrying && this.parryCooldown <= 0) this.activateParry(); }
             else if (selectedCharacterId === 'aegis') { if (bombPressed) this.toggleAegisShield(); if (this.isShielding) { this.shieldTimer -= deltaTime; if (this.shieldTimer <= 0) this.toggleAegisShield(); } }
             else if (selectedCharacterId === 'tempest') { this.orbiters.forEach((orb, i) => orb.update(deltaTime, this, i, this.orbiters.length)); if (this.orbiters.length < this.power) { this.orbiterCooldown -= deltaTime; if (this.orbiterCooldown <= 0) { this.orbiters.push(new Bullet(this.x, this.y, 0, 0, 'player', {isOrbiter: true, color:this.attackColor, accentColor:this.accentColor})); this.orbiterCooldown = 2.0; } } }
             else if (selectedCharacterId === 'sentry') { if (bombPressed && this.turretCooldown <= 0) this.deployTurret(); }
@@ -403,16 +416,14 @@
         shoot() {
             let p = Math.min(this.power, 5); let bulletOptions = { color: this.attackColor, accentColor: this.accentColor, skinRarity: this.skinRarity };
             this.shootCooldown = 0.12;
-            if (selectedCharacterId === 'berserker') { this.shootCooldown *= (0.4 + 0.6 * (this.lives / 3)); }
+            if (selectedCharacterId === 'berserker') { this.shootCooldown *= (0.5 + 0.5 * (this.lives / 3)); } // BALANCE: Nerfed
             else if (selectedCharacterId === 'spectre') { this.shootCooldown = 0.35; }
             else if (selectedCharacterId === 'arbiter') { this.shootCooldown = 0.4; }
-            else if (selectedCharacterId === 'pulse') { this.shootCooldown = 0.6; }
             playSound('shoot', 0.3);
             switch (selectedCharacterId) {
                 case 'tempest': return;
                 case 'arbiter': for(let i=0; i < 3 + p; i++) { bullets.push(new Bullet(this.x, this.y, -90 + (Math.random() - 0.5) * 45, 700 + Math.random() * 200, 'player', bulletOptions)); } break;
-                // MODIFICATION: Nova laser damage and properties buffed
-                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, this.y - canvas.height/2, -90, 0, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 3, height: canvas.height, lifespan: 0.4, damage: 25 + p * 5 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break;
+                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, this.y - 30, -90, 2000, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 2, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break; // No default shot
                 case 'blade': bullets.push(new Bullet(this.x, this.y, -90, 1200, 'player', { ...bulletOptions, isPiercing: true, width: 4 + p, height: 40 })); break;
                 case 'pulse': bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, isWave: true, size: 15 + p * 5, lifespan: 0.2 })); break;
                 case 'spectre': bullets.push(new Bullet(this.x, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 3) bullets.push(new Bullet(this.x - 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 5) bullets.push(new Bullet(this.x + 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); break;
@@ -420,21 +431,16 @@
                 default: if (p === 1) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); } else if (p === 2) { bullets.push(new Bullet(this.x - 5, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 5, this.y, -90, 800, 'player', bulletOptions)); } else if (p === 3) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -85, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -95, 800, 'player', bulletOptions)); } else if (p === 4) { bullets.push(new Bullet(this.x - 8, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 8, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x - 4, this.y, -85, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 4, this.y, -95, 800, 'player', bulletOptions)); } else if (p >= 5) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -80, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -100, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x - 10, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 10, this.y, -90, 800, 'player', bulletOptions)); } break;
             }
         }
-        takeHit() { if (this.isInvincible) return; if (this.isParrying) { this.parryPower++; return; } if (this.isShielding) { this.shieldPower++; bullets = bullets.filter(b => b.owner !== 'enemy' || Math.hypot(b.x - this.x, b.y - this.y) > 30); return; } playSound('playerHit'); screenShake = 15; this.lives--; this.power = Math.max(1, this.power - 1); if (selectedCharacterId === 'tempest') this.orbiters.pop(); this.isInvincible = true; this.invincibleTimer = 2; createExplosion(this.x, this.y, this.color, 40); if (this.lives < 0) { gameOver(); } }
+        takeHit() { if (this.isInvincible) return; if (this.isParrying) { this.parryPower++; return; } if (this.isShielding) return; playSound('playerHit'); screenShake = 15; this.lives--; this.power = Math.max(1, this.power - 1); if (selectedCharacterId === 'tempest') this.orbiters.pop(); this.isInvincible = true; this.invincibleTimer = 2; createExplosion(this.x, this.y, this.color, 40); if (this.lives < 0) { gameOver(); } }
         addChronoGauge(amount) { const lateGamePenalty = Math.max(0.3, 1 - (wave * 0.05)); this.chronoGauge = Math.min(this.chronoGaugeMax, this.chronoGauge + amount * lateGamePenalty); if (this.skinRarity === 4) { for(let i=0; i<3; i++) particles.push(new Particle(this.x, this.y, this.accentColor, 3, { type: 'spark' })); } }
         useBomb() { if (this.bombs <= 0) return; this.bombs--; playSound('explosion', 1.0); this.isInvincible = true; this.invincibleTimer = 1.5; bullets = bullets.filter(b => b.owner !== 'enemy'); enemies.forEach(e => e.takeDamage(50)); createScreenFlash(); if (this.skinData.hasSkillEffect) { createFireworkExplosion(this.x, this.y - 100, this.attackColor, this.accentColor, 50); } }
-        // MODIFICATION: Rift's Blink now deals AoE damage
-        useBlink(direction) { playSound('blink'); this.blinkCooldown = this.blinkMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.3; const blinkDist = 100; if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 20, { type: 'warp', speed: 800 }); } else { createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); } enemies.forEach(e => { if (Math.hypot(this.x - e.x, this.y - e.y) < 120) e.takeDamage(150); }); if(direction) { this.x += direction.x * blinkDist; this.y += direction.y * blinkDist; } else { this.y -= blinkDist; } this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x)); this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y)); createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); enemies.forEach(e => { if (Math.hypot(this.x - e.x, this.y - e.y) < 120) e.takeDamage(150); }); }
-        // MODIFICATION: Phase's Dash now deals AoE damage
-        useDash() { playSound('blink', 0.5); this.dashCooldown = this.dashMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.2; enemies.forEach(e => { if (Math.hypot(this.x - e.x, this.y - e.y) < 80) e.takeDamage(80); }); createExplosion(this.x, this.y, this.color, 15, { type: 'warp', speed: 300 }); }
-        activateParry() { this.isParrying = true; this.parryTimer = 0.25; this.parryPower = 0; if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 15, {speed: 100}); } }
-        // MODIFICATION: Echo's Parry now clears nearby bullets
-        releaseParry() { this.isParrying = false; if (this.parryPower > 0) { playSound('parry'); for(let i=0; i<this.parryPower; i++) { const angle = -90 + (Math.random() - 0.5) * 60; bullets.push(new Bullet(this.x, this.y, angle, 900, 'player', { size: 8, isPiercing: true, width: 8, height: 20, color: this.accentColor, accentColor: this.color })); } bullets = bullets.filter(b => b.owner === 'player' || Math.hypot(b.x - this.x, b.y - this.y) > 80); createExplosion(this.x, this.y, this.accentColor, 30); } }
-        // MODIFICATION: Aegis's Shield is buffed
-        toggleAegisShield() { this.isShielding = !this.isShielding; if (this.isShielding) { playSound('shieldUp'); this.shieldTimer = 2.0; this.shieldPower = 0; if (this.skinData.hasSkillEffect) { for(let i=0; i<36; i++) { particles.push(new Particle(this.x, this.y, this.accentColor, 2, {speed: 100, lifespan: 0.5, type: 'spark'})); } } } else { playSound('shieldDown'); if (this.shieldPower > 0) { bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { isWave: true, size: 30 + this.shieldPower * 10, lifespan: 0.5, color: this.attackColor, accentColor: this.accentColor, damage: 20 + this.shieldPower * 5 })); } } }
+        useBlink(direction) { playSound('blink'); this.blinkCooldown = this.blinkMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.3; const blinkDist = 100; if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 20, { type: 'warp', speed: 800 }); } else { createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); } if(direction) { this.x += direction.x * blinkDist; this.y += direction.y * blinkDist; } else { this.y -= blinkDist; } this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x)); this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y)); createExplosion(this.x, this.y, this.color, 20, { type: 'warp' }); }
+        useDash(moveX, moveY) { playSound('blink', 0.5); this.dashCooldown = this.dashMaxCooldown; this.isInvincible = true; this.invincibleTimer = 0.2; const dashDist = 60; if (this.skinData.hasSkillEffect) { for (let i=0; i<5; i++) particles.push(new Particle(this.x, this.y, this.accentColor, 4, {lifespan: 0.5, fade: true})); } createExplosion(this.x, this.y, this.color, 15, { type: 'warp', speed: 300 }); let dirX = moveX, dirY = moveY; if (dirX === 0 && dirY === 0) dirY = -1; const mag = Math.hypot(dirX, dirY); this.x += (dirX/mag) * dashDist; this.y += (dirY/mag) * dashDist; }
+        activateParry() { this.parryCooldown = this.parryMaxCooldown; this.isParrying = true; this.parryTimer = 0.25; this.parryPower = 0; if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 15, {speed: 100}); } }
+        releaseParry() { this.isParrying = false; if (this.parryPower > 0) { playSound('parry'); for(let i=0; i<this.parryPower; i++) { const angle = -90 + (Math.random() - 0.5) * 60; bullets.push(new Bullet(this.x, this.y, angle, 900, 'player', { size: 8, isPiercing: true, width: 8, height: 20, color: this.accentColor, accentColor: this.color })); } } }
+        toggleAegisShield() { this.isShielding = !this.isShielding; if (this.isShielding) { playSound('shieldUp'); this.shieldTimer = 2.0; this.shieldPower = 0; if (this.skinData.hasSkillEffect) { for(let i=0; i<36; i++) { particles.push(new Particle(this.x, this.y, this.accentColor, 2, {speed: 100, lifespan: 0.5, type: 'spark'})); } } } else { playSound('shieldDown'); if (this.shieldPower > 0) { bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { isWave: true, size: 20 + this.shieldPower * 2, lifespan: 0.5, color: this.attackColor, accentColor: this.accentColor })); } } }
         deployTurret() { playSound('shieldUp'); this.turretCooldown = this.turretMaxCooldown; turrets.push(new Turret(this.x, this.y, this.power, this.attackColor)); if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 30); } }
-        // MODIFICATION: Conjuror's Summon now clears bullets
-        summonAllies() { playSound('itemGet'); this.summonCooldown = this.summonMaxCooldown; allies.push(new Ally(this.x - 20, this.y, this.power, this.attackColor)); allies.push(new Ally(this.x + 20, this.y, this.power, this.attackColor)); bullets = bullets.filter(b => b.owner === 'player' || Math.hypot(b.x - this.x, b.y - this.y) > 100); if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 30, {type: 'spark'}); } }
+        summonAllies() { playSound('itemGet'); this.summonCooldown = this.summonMaxCooldown; allies.push(new Ally(this.x - 20, this.y, this.power, this.attackColor)); allies.push(new Ally(this.x + 20, this.y, this.power, this.attackColor)); if (this.skinData.hasSkillEffect) { createExplosion(this.x, this.y, this.accentColor, 30, {type: 'spark'}); } }
     }
     class Bullet {
         constructor(x, y, angle, speed, owner, special = {}) {
@@ -446,18 +452,6 @@
         update(deltaTime, playerRef, index, totalOrbiters) {
             if (this.special.isOrbiter) { const baseAngle = (Date.now() / 1000) * 1.5; const offsetAngle = (Math.PI * 2 / totalOrbiters) * index; this.x = playerRef.x + Math.cos(baseAngle + offsetAngle) * 60; this.y = playerRef.y + Math.sin(baseAngle + offsetAngle) * 60; return; }
             if (this.special.isHoming && this.owner === 'player') { let closestEnemy = null, minDist = Infinity; for (const enemy of enemies) { const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y); if (dist < minDist) { minDist = dist; closestEnemy = enemy; } } if (closestEnemy) { const angleToTarget = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x); this.vx += Math.cos(angleToTarget) * 2000 * deltaTime; this.vy += Math.sin(angleToTarget) * 2000 * deltaTime; const speed = Math.hypot(this.vx, this.vy), maxSpeed = 400; if (speed > maxSpeed) { this.vx = (this.vx / speed) * maxSpeed; this.vy = (this.vy / speed) * maxSpeed; } } }
-            
-            // MODIFICATION: Nova's laser now clears enemy bullets in its path
-            if (this.special.isLaser) {
-                for (let i = bullets.length - 1; i >= 0; i--) {
-                    const b = bullets[i];
-                    if (b.owner === 'enemy' && b.x > this.x - this.special.width/2 && b.x < this.x + this.special.width/2) {
-                        bullets.splice(i, 1);
-                        particles.push(new Particle(b.x, b.y, this.special.accentColor, 4, { lifespan: 0.4, fade: true, type: 'spark'}));
-                    }
-                }
-            }
-
             if (this.special.lifespan) { this.lifespan -= deltaTime; }
             this.x += this.vx * deltaTime * gameSpeed; this.y += this.vy * deltaTime * gameSpeed;
             if (this.special.bouncesLeft > 0) { if (this.x < 0 || this.x > canvas.width) { this.vx *= -1; this.special.bouncesLeft--; } if (this.y < 0) { this.vy *= -1; this.special.bouncesLeft--; } }
@@ -466,7 +460,7 @@
             ctx.fillStyle = this.color;
             if (this.owner === 'player' && this.special.skinRarity > 1) { ctx.shadowColor = this.color; ctx.shadowBlur = this.special.skinRarity * 4; if (this.special.skinRarity > 2) { particles.push(new Particle(this.x, this.y, this.special.accentColor, this.size * 0.7, { lifespan: 0.3, fade: true })); } }
             ctx.beginPath();
-            if (this.special.isLaser) { ctx.globalAlpha = this.lifespan / 0.4; ctx.fillStyle = this.special.accentColor; ctx.fillRect(this.x - this.special.width / 2, this.y, this.special.width, this.special.height); ctx.fillStyle = this.color; ctx.fillRect(this.x - this.special.width/4, this.y, this.special.width/2, this.special.height); ctx.globalAlpha = 1.0; }
+            if (this.special.isLaser) { ctx.globalAlpha = this.lifespan / 0.3; ctx.fillStyle = this.special.accentColor; ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height); ctx.fillStyle = this.color; ctx.fillRect(this.x - this.width/4, this.y - this.height/2, this.width/2, this.height); ctx.globalAlpha = 1.0; }
             else if (this.special.isWave) { ctx.globalAlpha = this.lifespan / this.special.lifespan; ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.globalAlpha = 1; }
             else if (this.special.isPiercing) { ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height); }
             else { ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); }
@@ -524,14 +518,13 @@
                 case 'shooter': for (let i = -1; i <= 1; i++) { bullets.push(new Bullet(this.x, this.y, angleToPlayer + i * 15, this.bulletSpeed * 0.8, 'enemy')); } this.shootTimer = 2.0; break;
                 case 'boss':
                     const pTimer = this.patternTimer;
-                    // MODIFICATION: Boss patterns updated to remove safe spots
                     switch(this.pattern) {
-                        case 'crossfire': for(let i=0; i<3; i++) bullets.push(new Bullet(this.x, this.y, angleToPlayer + (i * 20 - 20) + (Math.random() - 0.5) * 15, this.bulletSpeed * 1.1, 'enemy')); this.shootTimer = 0.3; break;
-                        case 'weave': for (let i = 0; i < 5; i++) { bullets.push(new Bullet(canvas.width * (pTimer/this.patternDuration) + i*20 - 40, -20, 90 + Math.sin(pTimer * 5 + i) * 5, this.bulletSpeed * 0.5, 'enemy')); bullets.push(new Bullet(canvas.width * (1 - pTimer/this.patternDuration) - i*20 + 40, -20, 90 - Math.sin(pTimer * 5 + i) * 5, this.bulletSpeed * 0.5, 'enemy')); } this.shootTimer = 0.1; break;
-                        case 'sunburst': for (let i = 0; i < 36; i++) bullets.push(new Bullet(this.x, this.y, i * 10 + pTimer * 15, this.bulletSpeed, 'enemy')); this.shootTimer = 1.5; break;
+                        case 'crossfire': for(let i=0; i<2; i++) bullets.push(new Bullet(this.x, this.y, angleToPlayer + i * 20 - 10, this.bulletSpeed * 1.1, 'enemy')); this.shootTimer = 0.3; break;
+                        case 'weave': for (let i = 0; i < 5; i++) bullets.push(new Bullet(canvas.width * (pTimer/this.patternDuration) + i*20 - 40, -20, 90, this.bulletSpeed * 0.5, 'enemy')); this.shootTimer = 0.1; break;
+                        case 'sunburst': for (let i = 0; i < 36; i++) bullets.push(new Bullet(this.x, this.y, i * 10, this.bulletSpeed, 'enemy')); this.shootTimer = 1.5; break;
                         case 'ricochet': bullets.push(new Bullet(this.x, this.y, pTimer * 40, this.bulletSpeed, 'enemy', {bouncesLeft: 1})); this.shootTimer = 0.2; break;
                         case 'desperate': bullets.push(new Bullet(this.x, this.y, angleToPlayer + Math.random()*40-20, this.bulletSpeed * 1.5, 'enemy')); if(Math.random() < 0.1) bullets.push(new Bullet(this.x, this.y, Math.random()*360, this.bulletSpeed * 0.8, 'enemy')); this.shootTimer = 0.1; break;
-                        default: const originX = this.x + Math.sin(pTimer * 2.5) * 100; const originY = this.y + Math.cos(pTimer * 3) * 30; bullets.push(new Bullet(originX, originY, pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); bullets.push(new Bullet(originX, originY, -pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); this.shootTimer = 0.1; break;
+                        default: bullets.push(new Bullet(this.x, this.y, pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); bullets.push(new Bullet(this.x, this.y, -pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); this.shootTimer = 0.1; break;
                     } break;
             }
         }
@@ -539,20 +532,14 @@
             if (this.type === 'barrier' && this.shieldHealth > 0 && !fromBehind) { this.shieldHealth -= damage; if(this.shieldHealth <= 0) createExplosion(this.x, this.y + this.size, '#00ffff', 20); return; }
             this.health -= damage;
             if (this.health <= 0) {
-                if (player) { // Update stats only if player is alive
-                    playerStats.totalKills++;
-                }
+                if (player) { playerStats.totalKills++; }
                 const scoreBonus = selectedCharacterId === 'blade' ? 1.5 : 1;
                 score += this.scoreValue * Math.floor(scoreMultiplier) * scoreBonus;
                 if (selectedCharacterId === 'pulse' && player) player.addChronoGauge(0.5);
                 if (this.type === 'boss') bossKillBonus += 250;
                 
-                if (player && player.skinData.killEffect === 'firework') {
-                    createFireworkExplosion(this.x, this.y, player.attackColor, player.accentColor);
-                } else {
-                    createExplosion(this.x, this.y, this.color, 20);
-                }
-
+                if (player && player.skinData.killEffect === 'firework') { createFireworkExplosion(this.x, this.y, player.attackColor, player.accentColor);
+                } else { createExplosion(this.x, this.y, this.color, 20); }
                 playSound('explosion');
                 const dropChance = this.type === 'boss' ? 1.0 : 0.08;
                 if (Math.random() < dropChance) { let itemType = 'P'; const rand = Math.random(); if (rand < 0.25) itemType = 'B'; else if (rand < 0.5) itemType = 'C'; powerUps.push(new PowerUpItem(this.x, this.y, itemType)); }
@@ -594,9 +581,8 @@
             ctx.fill();
             ctx.globalAlpha = 1;
         }
-        // MODIFICATION: Sentry's turret now shoots faster and piercing bullets
         shoot() {
-            this.shootCooldown = 0.8 / (1 + this.power * 0.3);
+            this.shootCooldown = 1.0 / (1 + this.power * 0.2);
             let closestEnemy = null, minDist = Infinity;
             for (const enemy of enemies) {
                 const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y);
@@ -604,7 +590,7 @@
             }
             if (closestEnemy) {
                 const angleToTarget = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x) * 180 / Math.PI;
-                bullets.push(new Bullet(this.x, this.y, angleToTarget, 500, 'player', {color: this.color, isPiercing: true, width: 6, height: 10}));
+                bullets.push(new Bullet(this.x, this.y, angleToTarget, 500, 'player', {color: this.color}));
             }
         }
     }
@@ -637,11 +623,10 @@
             ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
             ctx.fill();
         }
-        // MODIFICATION: Conjuror's allies now shoot homing bullets
         shoot() {
-            this.shootCooldown = 1.0 / (1 + this.power * 0.1);
+            this.shootCooldown = 1.2 / (1 + this.power * 0.1);
             if (enemies.length > 0) {
-                bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', {size: 5, color: this.color, isHoming: true}));
+                bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', {size: 4, color: this.color}));
             }
         }
     }
@@ -649,44 +634,10 @@
     // --- 4. 핵심 로직 및 게임 루프 ---
     const inputHandler = { keys: {}, touch: { x: 0, y: 0, active: false, chronoActive: false, bombPressed: false }, setup() { document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'none'); if (controlMode === 'touch') { document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'flex'); canvas.addEventListener('touchstart', this.handleTouch.bind(this)); canvas.addEventListener('touchmove', this.handleTouch.bind(this)); canvas.addEventListener('touchend', e => { this.touch.active = false; }); mobileChronoButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.chronoActive = true; mobileChronoButton.classList.add('active'); }); mobileChronoButton.addEventListener('touchend', e => { e.preventDefault(); this.touch.chronoActive = false; mobileChronoButton.classList.remove('active'); }); mobileBombButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.bombPressed = true; mobileBombButton.classList.add('active'); }); mobileBombButton.addEventListener('touchend', e => { e.preventDefault(); mobileBombButton.classList.remove('active'); }); } else { document.addEventListener('keydown', e => { this.keys[e.key] = true; }); document.addEventListener('keyup', e => { this.keys[e.key] = false; }); } }, handleTouch(e) { e.preventDefault(); this.touch.active = true; const rect = canvas.getBoundingClientRect(); this.touch.x = e.touches[0].clientX - rect.left; this.touch.y = e.touches[0].clientY - rect.top; } };
     function checkCollisions() {
-        for (let i = bullets.length - 1; i >= 0; i--) { 
-            const b = bullets[i]; 
-            if (!b || b.owner !== 'player') continue; 
-            
-            // MODIFICATION: Use bullet's special damage if available, otherwise calculate default
-            const damage = b.special.damage || (10 + player.power); 
-
-            for (let j = enemies.length - 1; j >= 0; j--) { 
-                const e = enemies[j]; 
-                if (!e) continue;
-                
-                // MODIFICATION: Added AABB collision check for lasers
-                if (b.special.isLaser) {
-                    if (e.x + e.size > b.x - b.special.width / 2 && e.x - e.size < b.x + b.special.width / 2 &&
-                        e.y + e.size > b.y && e.y - e.size < b.y + b.special.height) {
-                        // Lasers deal damage continuously, so no hitEnemies set needed
-                        e.takeDamage(damage * gameSpeed); // Apply damage scaled by gameSpeed for per-frame feel
-                    }
-                } else {
-                    const dist = Math.hypot(b.x - e.x, b.y - e.y);
-                    if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { 
-                        if (b.special.isPiercing) { 
-                            if (b.hitEnemies.has(e)) continue; 
-                            b.hitEnemies.add(e); 
-                        } 
-                        e.takeDamage(damage, b.y < e.y); 
-                        if (!b.special.isPiercing && !b.special.isWave) { 
-                            bullets.splice(i, 1); 
-                            break; 
-                        } 
-                    }
-                }
-            } 
-        }
-
+        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'player') continue; const damage = 10 + player.power; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(b.x - e.x, b.y - e.y); if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { if (b.special.isPiercing) { if (b.hitEnemies.has(e)) continue; b.hitEnemies.add(e); } e.takeDamage(damage, b.y < e.y); if (!b.special.isPiercing && !b.special.isWave) { bullets.splice(i, 1); break; } } } }
         if (player && player.orbiters) { for (const orb of player.orbiters) { const damage = (5 + player.power) * 0.2; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(orb.x - e.x, orb.y - e.y); if (dist < e.size + orb.size) { e.takeDamage(damage); } } } }
         if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); playerStats.totalGraze++; } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
-        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); playerStats.totalShardsEarned += 50 + Math.floor(Math.random() * 51); updateAllUI(); break; } powerUps.splice(i, 1); } } }
+        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': const earned = 50 + Math.floor(Math.random() * 51); chronoShards += earned; playerStats.totalShardsEarned += earned; updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
     function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
     function createExplosion(x, y, color, count, options) { for (let i = 0; i < count; i++) { particles.push(new Particle(x, y, color, 5, options)); } }
@@ -738,7 +689,7 @@
         ctx.restore();
         updateInGameUI();
     }
-    function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryTimer > 0 ? 'ON' : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; case 'sentry': specialText = `TURRET ${player.turretCooldown > 0 ? Math.ceil(player.turretCooldown) : 'RDY'}`; break; case 'conjuror': specialText = `SUMMON ${player.summonCooldown > 0 ? Math.ceil(player.summonCooldown) : 'RDY'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } }
+    function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryCooldown > 0 ? Math.ceil(player.parryCooldown) : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; case 'sentry': specialText = `TURRET ${player.turretCooldown > 0 ? Math.ceil(player.turretCooldown) : 'RDY'}`; break; case 'conjuror': specialText = `SUMMON ${player.summonCooldown > 0 ? Math.ceil(player.summonCooldown) : 'RDY'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } }
     function gameLoop(timestamp) { if (!lastTime) lastTime = timestamp; const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000); lastTime = timestamp; if (gameState === 'playing') update(deltaTime); draw(); animationFrameId = requestAnimationFrame(gameLoop); }
     function gameOver() {
         gameState = 'gameOver';
@@ -780,7 +731,7 @@
             titleEl.style.textShadow = '2px 2px 5px #000';
             titleEl.style.zIndex = '100';
             titleEl.style.animation = 'fade-out 2s forwards';
-            gameContainer.appendChild(titleEl); // BUG FIX: Use gameContainer variable
+            gameContainer.appendChild(titleEl);
             setTimeout(() => titleEl.remove(), 2000);
         }
         resetGame();
@@ -788,12 +739,11 @@
     }
 
     // --- 6. 데이터 관리 및 UI ---
-    function saveData() { localStorage.setItem('chronoBreakData_v10', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals, playerStats })); }
+    function saveData() { localStorage.setItem('chronoBreakData_v11', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals, playerStats })); }
     function loadData() {
-        // MODIFICATION: Data loading logic remains compatible with v9
-        let data = JSON.parse(localStorage.getItem('chronoBreakData_v10'));
+        let data = JSON.parse(localStorage.getItem('chronoBreakData_v11'));
         if (!data) {
-            data = JSON.parse(localStorage.getItem('chronoBreakData_v9')) || {};
+            data = JSON.parse(localStorage.getItem('chronoBreakData_v10')) || {};
             const defaultCharacters = initializeCharacterData(characters);
             if (data.characters) {
                 Object.keys(defaultCharacters).forEach(id => {
@@ -802,6 +752,14 @@
                 data.characters = initializeCharacterData(data.characters);
             } else {
                 data.characters = defaultCharacters;
+            }
+            // NOVA BUG FIX - ONE-TIME RESET
+            if (data.characters && data.characters.nova) {
+                if (data.highScore === data.characters.nova.highScore) {
+                    data.highScore = 0;
+                }
+                data.characters.nova.highScore = 0;
+                data.characters.nova.skins.mythic.unlocked = false;
             }
         }
 
