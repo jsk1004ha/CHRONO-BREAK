@@ -46,6 +46,7 @@
         #main-title-display { color: var(--rarity-legendary); font-size: 0.8em; margin-bottom: 10px; }
         #shards-earned.animate { animation: pop-in 0.5s ease-out; }
         @keyframes pop-in { 0% { transform: scale(0.5); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+        @keyframes fade-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(1.2); } }
         .main-menu-buttons { display: flex; flex-direction: column; gap: 15px; width: 80%; max-width: 400px; }
         .main-menu-buttons button { padding: 15px 20px; font-size: 1.2em; width: 100%; }
         /* Hangar & Profile Content */
@@ -170,6 +171,7 @@
 
     <script>
     // --- 1. 전역 변수 및 상수 초기화 ---
+    const gameContainer = document.getElementById('game-container'); // BUG FIX: Define gameContainer
     const canvas = document.getElementById('game-canvas'), ctx = canvas.getContext('2d');
     const mainMenuScreen = document.getElementById('main-menu-screen'), gameOverScreen = document.getElementById('game-over-screen');
     const hangarScreen = document.getElementById('hangar-screen'), shopScreen = document.getElementById('shop-screen'), profileScreen = document.getElementById('profile-screen');
@@ -350,7 +352,6 @@
             }
             this.shootCooldown -= deltaTime;
             
-            // NOVA LOGIC FIX
             if (selectedCharacterId === 'nova') {
                 if (!isMoving) {
                     this.chargeLevel = Math.min(this.chargeMax, this.chargeLevel + deltaTime);
@@ -409,7 +410,7 @@
             switch (selectedCharacterId) {
                 case 'tempest': return;
                 case 'arbiter': for(let i=0; i < 3 + p; i++) { bullets.push(new Bullet(this.x, this.y, -90 + (Math.random() - 0.5) * 45, 700 + Math.random() * 200, 'player', bulletOptions)); } break;
-                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, this.y - 30, -90, 2000, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 2, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } else { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); } break;
+                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, this.y - 30, -90, 2000, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 2, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break;
                 case 'blade': bullets.push(new Bullet(this.x, this.y, -90, 1200, 'player', { ...bulletOptions, isPiercing: true, width: 4 + p, height: 40 })); break;
                 case 'pulse': bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, isWave: true, size: 15 + p * 5, lifespan: 0.2 })); break;
                 case 'spectre': bullets.push(new Bullet(this.x, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 3) bullets.push(new Bullet(this.x - 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 5) bullets.push(new Bullet(this.x + 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); break;
@@ -629,7 +630,7 @@
         for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'player') continue; const damage = 10 + player.power; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(b.x - e.x, b.y - e.y); if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { if (b.special.isPiercing) { if (b.hitEnemies.has(e)) continue; b.hitEnemies.add(e); } e.takeDamage(damage, b.y < e.y); if (!b.special.isPiercing && !b.special.isWave) { bullets.splice(i, 1); break; } } } }
         if (player && player.orbiters) { for (const orb of player.orbiters) { const damage = (5 + player.power) * 0.2; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(orb.x - e.x, orb.y - e.y); if (dist < e.size + orb.size) { e.takeDamage(damage); } } } }
         if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); playerStats.totalGraze++; } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
-        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); updateAllUI(); break; } powerUps.splice(i, 1); } } }
+        for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': chronoShards += 50 + Math.floor(Math.random() * 51); playerStats.totalShardsEarned += 50 + Math.floor(Math.random() * 51); updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
     function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
     function createExplosion(x, y, color, count, options) { for (let i = 0; i < count; i++) { particles.push(new Particle(x, y, color, 5, options)); } }
@@ -723,7 +724,7 @@
             titleEl.style.textShadow = '2px 2px 5px #000';
             titleEl.style.zIndex = '100';
             titleEl.style.animation = 'fade-out 2s forwards';
-            game-container.appendChild(titleEl);
+            gameContainer.appendChild(titleEl); // BUG FIX: Use gameContainer variable
             setTimeout(() => titleEl.remove(), 2000);
         }
         resetGame();
