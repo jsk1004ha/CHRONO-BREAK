@@ -13,6 +13,7 @@
             --bg-color: #0d0d1a; --player-color: #00ffff;
             --enemy-color-1: #ff4d4d; --enemy-color-2: #ffcc00; --enemy-dasher-color: #f0a050; --enemy-weaver-color: #9d74e0; --enemy-kamikaze-color: #ffffff; --boss-color: #ff00ff;
             --enemy-sentinel-color: #c0c0c0; --enemy-bulwark-color: #708090; --enemy-barrier-color: #4682b4;
+            --enemy-splitter-color: #ff6600; --enemy-summoner-color: #b300ff;
             --enemy-bullet-color: #ff80ff;
             --powerup-p-color: #4dff4d; --powerup-b-color: #4da6ff; --powerup-c-color: #cc66ff; --powerup-s-color: #a9d4ff;
             --hud-color: #ffffff; --gauge-color: #00ffff; --gauge-bg-color: #33334d; --button-bg: rgba(255, 255, 255, 0.1); --button-border: rgba(255, 255, 255, 0.5); --shard-color: #a9d4ff;
@@ -673,8 +674,8 @@
         }
     }
     class Enemy {
-        constructor(x, y, type) { this.x = x; this.y = y; this.type = type; const difficulty = 1 + wave * 0.22; this.init(difficulty); this.isElite = false; if (wave > 10 && Math.random() < 0.1) this.makeElite(difficulty); }
-        init(difficulty) { this.shootTimer = Math.random() * 2 + 1; this.bulletSpeed = 250 * (1 + wave * 0.1); switch(this.type) { case 'bulwark': this.size = 25; this.health = 80 * difficulty; this.color = colors.bulwark; this.speed = 30; this.scoreValue = 500; break; case 'sentinel': this.size = 18; this.health = 20 * difficulty; this.color = colors.sentinel; this.speed = 20; this.scoreValue = 400; this.laserCharge = 0; this.laserMaxCharge = 3; break; case 'barrier': this.size = 20; this.health = 30 * difficulty; this.color = colors.barrier; this.speed = 50; this.scoreValue = 350; this.shieldHealth = 50 * difficulty; break; case 'dasher': this.size = 12; this.health = 10 * difficulty; this.color = colors.dasher; this.speed = 300; this.scoreValue = 150; this.vy = this.speed; this.vx = Math.random() > 0.5 ? 100 : -100; break; case 'weaver': this.size = 18; this.health = 25 * difficulty; this.color = colors.weaver; this.speed = 80; this.scoreValue = 250; this.baseX = this.x; this.angle = 0; break; case 'kamikaze': this.size = 15; this.health = 5 * difficulty; this.color = colors.kamikaze; this.speed = 150; this.scoreValue = 200; break; case 'basic': this.size = 15; this.health = 15 * difficulty; this.color = colors.enemy1; this.speed = 100; this.scoreValue = 100; break; case 'shooter': this.size = 20; this.health = 40 * difficulty; this.color = colors.enemy2; this.speed = 60; this.scoreValue = 300; break; case 'boss': this.size = 50; this.health = (2000 + wave * 600) * difficulty; this.maxHealth = this.health; this.color = colors.boss; this.speed = 50; this.scoreValue = 10000; this.pattern = 'entry'; this.patternTimer = 0; this.patternDuration = 8; this.bulletSpeed *= 1.2; this.moveTimer = 2; this.moveTargetX = this.x; break; } }
+        constructor(x, y, type) { this.x = x; this.y = y; this.type = type; const difficulty = 1 + wave * 0.22; this.init(difficulty); this.isElite = false; this.isSplitterFragment = false; if (wave > 10 && Math.random() < 0.1 && !this.isSplitterFragment) this.makeElite(difficulty); }
+        init(difficulty) { this.shootTimer = Math.random() * 2 + 1; this.bulletSpeed = 250 * (1 + wave * 0.1); switch(this.type) { case 'bulwark': this.size = 25; this.health = 80 * difficulty; this.color = colors.bulwark; this.speed = 30; this.scoreValue = 500; break; case 'sentinel': this.size = 18; this.health = 20 * difficulty; this.color = colors.sentinel; this.speed = 20; this.scoreValue = 400; this.laserCharge = 0; this.laserMaxCharge = 3; break; case 'barrier': this.size = 20; this.health = 30 * difficulty; this.color = colors.barrier; this.speed = 50; this.scoreValue = 350; this.shieldHealth = 50 * difficulty; break; case 'dasher': this.size = 12; this.health = 10 * difficulty; this.color = colors.dasher; this.speed = 300; this.scoreValue = 150; this.vy = this.speed; this.vx = Math.random() > 0.5 ? 100 : -100; break; case 'weaver': this.size = 18; this.health = 25 * difficulty; this.color = colors.weaver; this.speed = 80; this.scoreValue = 250; this.baseX = this.x; this.angle = 0; break; case 'kamikaze': this.size = 15; this.health = 5 * difficulty; this.color = colors.kamikaze; this.speed = 150; this.scoreValue = 200; break; case 'basic': this.size = 15; this.health = 15 * difficulty; this.color = colors.enemy1; this.speed = 100; this.scoreValue = 100; break; case 'shooter': this.size = 20; this.health = 40 * difficulty; this.color = colors.enemy2; this.speed = 60; this.scoreValue = 300; break; case 'splitter': this.size = 22; this.health = 60 * difficulty; this.color = colors.splitter; this.speed = 50; this.scoreValue = 400; this.hasSplit = false; break; case 'summoner': this.size = 28; this.health = 120 * difficulty; this.color = colors.summoner; this.speed = 25; this.scoreValue = 800; this.summonTimer = 0; this.summonCooldown = 3; this.minionsSpawned = 0; this.maxMinions = 2; break; case 'boss': this.size = 50; this.health = (20000 + wave * 6000) * difficulty; this.maxHealth = this.health; this.color = colors.boss; this.speed = 50; this.scoreValue = 10000; this.pattern = 'entry'; this.patternTimer = 0; this.patternDuration = 8; this.bulletSpeed *= 1.2; this.moveTimer = 2; this.moveTargetX = this.x; this.waveDirection = 1; this.orbitalAngle = 0; this.guidedMissiles = []; this.lightningTargets = []; break; } }
         makeElite(difficulty) { this.isElite = true; this.health *= 2; this.bulletSpeed *= 1.2; this.color = '#FFD700'; this.scoreValue *= 3; if (this.shieldHealth) this.shieldHealth *= 2; }
         update(deltaTime) {
             switch(this.type) {
@@ -682,6 +683,8 @@
                 case 'dasher': this.x += this.vx * deltaTime * gameSpeed; this.y += this.vy * deltaTime * gameSpeed; if (this.x < 0 || this.x > canvas.width) this.vx *= -1; break;
                 case 'weaver': this.y += this.speed * deltaTime * gameSpeed; this.angle += 3 * deltaTime * gameSpeed; this.x = this.baseX + Math.sin(this.angle) * 80; break;
                 case 'kamikaze': if (player) { const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x); this.x += Math.cos(angleToPlayer) * this.speed * deltaTime * gameSpeed; this.y += Math.sin(angleToPlayer) * this.speed * deltaTime * gameSpeed; if (Math.hypot(this.x - player.x, this.y - player.y) < this.size + player.hitboxSize) { this.health = 0; player.takeHit(); } } break;
+                case 'splitter': this.y += this.speed * deltaTime * gameSpeed; this.x += Math.sin(Date.now() * 0.002) * 20 * deltaTime; break;
+                case 'summoner': if (this.y < 100) this.y += this.speed * deltaTime * gameSpeed; else { this.x += Math.sin(Date.now() * 0.001) * 30 * deltaTime; this.summonTimer += deltaTime * gameSpeed; if (this.summonTimer >= this.summonCooldown && this.minionsSpawned < this.maxMinions) { this.summonMinion(); this.summonTimer = 0; } } break;
                 default: this.y += this.speed * deltaTime * gameSpeed; break;
             }
             this.shootTimer -= deltaTime * gameSpeed; if (this.shootTimer <= 0 && this.type !== 'sentinel' && this.type !== 'boss') this.shoot();
@@ -705,18 +708,36 @@
                 this.patternTimer += deltaTime; 
                 this.shootTimer -= deltaTime;
                 if(this.shootTimer <= 0) this.shoot();
+                
+                // 궤도 타격용 각도 업데이트
+                this.orbitalAngle += deltaTime * 2;
+                
+                // 유도 미사일 업데이트
+                this.guidedMissiles = this.guidedMissiles.filter(missile => {
+                    missile.update(deltaTime);
+                    return missile.active;
+                });
+                
+                // 번개 공격 타겟 업데이트
+                this.lightningTargets = this.lightningTargets.filter(target => {
+                    target.timer -= deltaTime;
+                    return target.timer > 0;
+                });
 
                 if (this.patternTimer >= this.patternDuration) {
                     this.patternTimer = 0;
                     const healthRatio = this.health / this.maxHealth;
-                    const patterns = ['crossfire', 'weave', 'sunburst', 'ricochet', 'spiral', 'spawn_minions'];
+                    const basicPatterns = ['crossfire', 'weave', 'sunburst', 'ricochet', 'spiral', 'spawn_minions'];
+                    const advancedPatterns = ['tidal_wave', 'lightning_strike', 'orbital_strike', 'guided_missiles', 'area_blast'];
                     let nextPattern;
                     if (healthRatio < 0.2) {
                         nextPattern = 'desperate';
                     } else if (healthRatio < 0.5) {
                         // Under 50% health, add more difficult patterns to the mix
-                        nextPattern = patterns.concat(['sunburst', 'ricochet', 'desperate'])[Math.floor(Math.random() * 9)];
+                        const allPatterns = basicPatterns.concat(advancedPatterns, ['sunburst', 'ricochet', 'desperate']);
+                        nextPattern = allPatterns[Math.floor(Math.random() * allPatterns.length)];
                     } else {
+                        const patterns = basicPatterns.concat(advancedPatterns);
                         nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
                     }
                     this.pattern = nextPattern;
@@ -777,6 +798,52 @@
                     ctx.lineTo(this.x + this.size * 0.7, this.y + this.size);
                     ctx.lineTo(this.x - this.size * 0.7, this.y + this.size);
                     break;
+                case 'splitter':
+                    // 사이버펑크 다이아몬드 형태
+                    ctx.moveTo(this.x, this.y - this.size);
+                    ctx.lineTo(this.x + this.size * 0.7, this.y);
+                    ctx.lineTo(this.x, this.y + this.size);
+                    ctx.lineTo(this.x - this.size * 0.7, this.y);
+                    // 내부 코어
+                    ctx.fill();
+                    ctx.fillStyle = '#ffaa00';
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 0.4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y - this.size);
+                    ctx.lineTo(this.x + this.size * 0.7, this.y);
+                    ctx.lineTo(this.x, this.y + this.size);
+                    ctx.lineTo(this.x - this.size * 0.7, this.y);
+                    break;
+                case 'summoner':
+                    // 사이버펑크 육각형
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i / 6) * Math.PI * 2;
+                        const xPos = this.x + this.size * Math.cos(angle);
+                        const yPos = this.y + this.size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos);
+                    }
+                    // 내부 원형 패턴들
+                    ctx.fill();
+                    ctx.strokeStyle = '#ff80ff';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, (this.size * 0.3) + i * 5, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                    ctx.strokeStyle = this.isElite ? '#FFD700' : '#FFF';
+                    ctx.lineWidth = this.isElite ? 3 : 1.5;
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i / 6) * Math.PI * 2;
+                        const xPos = this.x + this.size * Math.cos(angle);
+                        const yPos = this.y + this.size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos);
+                    }
+                    break;
                 case 'boss':
                      for (let i = 0; i < 8; i++) {
                         const angle = (i / 8) * Math.PI * 2;
@@ -796,7 +863,32 @@
             ctx.shadowBlur = 0;
 
             if (this.type === 'barrier' && this.shieldHealth > 0) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(this.x - this.size, this.y + this.size); ctx.lineTo(this.x + this.size, this.y + this.size); ctx.stroke(); }
-            if(this.type === 'boss') { const barWidth = canvas.width * 0.8, barX = (canvas.width - barWidth) / 2; ctx.fillStyle = 'rgba(50,50,50,0.8)'; ctx.fillRect(barX, 10, barWidth, 10); ctx.fillStyle = this.color; ctx.fillRect(barX, 10, barWidth * (this.health / this.maxHealth), 10); }
+            if(this.type === 'boss') { 
+                const barWidth = canvas.width * 0.8, barX = (canvas.width - barWidth) / 2; 
+                ctx.fillStyle = 'rgba(50,50,50,0.8)'; 
+                ctx.fillRect(barX, 10, barWidth, 10); 
+                ctx.fillStyle = this.color; 
+                ctx.fillRect(barX, 10, barWidth * (this.health / this.maxHealth), 10);
+                
+                // 번개 공격 경고 표시
+                this.lightningTargets.forEach(target => {
+                    if (target.timer > 0.5) {
+                        ctx.strokeStyle = '#ffff00';
+                        ctx.globalAlpha = 0.7;
+                        ctx.lineWidth = 3;
+                        ctx.setLineDash([5, 5]);
+                        ctx.beginPath();
+                        ctx.moveTo(target.x, 0);
+                        ctx.lineTo(target.x, canvas.height);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+                        ctx.globalAlpha = 1.0;
+                    }
+                });
+                
+                // 유도 미사일 그리기
+                this.guidedMissiles.forEach(missile => missile.draw(ctx));
+            }
             if (this.type === 'sentinel' && this.laserCharge > this.laserMaxCharge - 1) { ctx.strokeStyle = 'red'; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(player.x, player.y); ctx.stroke(); ctx.globalAlpha = 1.0; }
         }
         shoot() {
@@ -808,6 +900,8 @@
                 case 'weaver': bullets.push(new Bullet(this.x, this.y, this.angle * 180 / Math.PI, this.bulletSpeed, 'enemy')); this.shootTimer = 1.5; break;
                 case 'basic': bullets.push(new Bullet(this.x, this.y, angleToPlayer, this.bulletSpeed, 'enemy')); this.shootTimer = 2.5; break;
                 case 'shooter': for (let i = -1; i <= 1; i++) { bullets.push(new Bullet(this.x, this.y, angleToPlayer + i * 15, this.bulletSpeed * 0.8, 'enemy')); } this.shootTimer = 2.0; break;
+                case 'splitter': bullets.push(new Bullet(this.x, this.y, angleToPlayer + (Math.random() - 0.5) * 30, this.bulletSpeed * 0.9, 'enemy')); this.shootTimer = 2.5; break;
+                case 'summoner': for (let i = 0; i < 5; i++) { bullets.push(new Bullet(this.x, this.y, angleToPlayer + (i - 2) * 20, this.bulletSpeed * 0.7, 'enemy')); } this.shootTimer = 3.0; break;
                 case 'boss':
                     const pTimer = this.patternTimer;
                     switch(this.pattern) {
@@ -843,6 +937,74 @@
                             if(Math.random() < 0.1) bullets.push(new Bullet(this.x, this.y, Math.random()*360, this.bulletSpeed * 0.8, 'enemy')); 
                             this.shootTimer = 0.1; 
                             break;
+                        case 'tidal_wave':
+                            // 파도: 한쪽에서 다른쪽으로 순차 발사
+                            const waveX = this.waveDirection > 0 ? (pTimer / this.patternDuration) * canvas.width : canvas.width - (pTimer / this.patternDuration) * canvas.width;
+                            for (let i = 0; i < 3; i++) {
+                                bullets.push(new Bullet(waveX + (i-1)*30, this.y + 20, 90 + (i-1)*10, this.bulletSpeed * 0.8, 'enemy'));
+                            }
+                            if (pTimer > this.patternDuration * 0.9) this.waveDirection *= -1;
+                            this.shootTimer = 0.15;
+                            break;
+                        case 'lightning_strike':
+                            // 번개: 플레이어 예상 위치에 경고 후 레이저 발사
+                            if (pTimer < 1) {
+                                const predictedX = player.x + player.vx * 0.5;
+                                this.lightningTargets.push({
+                                    x: Math.max(20, Math.min(canvas.width-20, predictedX)),
+                                    timer: 1.5,
+                                    warned: false
+                                });
+                                this.shootTimer = 1.0;
+                            } else {
+                                this.lightningTargets.forEach(target => {
+                                    if (target.timer < 0.5 && !target.fired) {
+                                        bullets.push(new Bullet(target.x, -10, 90, this.bulletSpeed * 3, 'enemy', {isPiercing: true, width: 8, height: canvas.height}));
+                                        target.fired = true;
+                                    }
+                                });
+                                this.shootTimer = 0.3;
+                            }
+                            break;
+                        case 'orbital_strike':
+                            // 궤도 타격: 보스 주변 3개 궤도에서 회전하며 발사
+                            for (let orbit = 0; orbit < 3; orbit++) {
+                                const orbitRadius = 80 + orbit * 30;
+                                const orbitSpeed = (orbit + 1) * 0.5;
+                                const angle = this.orbitalAngle * orbitSpeed + orbit * 120;
+                                const orbitX = this.x + Math.cos(angle * Math.PI / 180) * orbitRadius;
+                                const orbitY = this.y + Math.sin(angle * Math.PI / 180) * orbitRadius;
+                                bullets.push(new Bullet(orbitX, orbitY, angle + 90, this.bulletSpeed * 0.6, 'enemy'));
+                            }
+                            this.shootTimer = 0.2;
+                            break;
+                        case 'guided_missiles':
+                            // 유도 미사일: 플레이어를 추적하다가 가까이 가면 직진
+                            if (this.guidedMissiles.length < 4) {
+                                this.guidedMissiles.push(new GuidedMissile(this.x + (Math.random()-0.5)*60, this.y + 30, this.bulletSpeed * 0.4));
+                            }
+                            this.shootTimer = 1.5;
+                            break;
+                        case 'area_blast':
+                            // 범위공격: 플레이어 주변에 폭발 지역 생성
+                            const blastX = player.x + (Math.random()-0.5)*100;
+                            const blastY = player.y + (Math.random()-0.5)*100;
+                            // 경고 이펙트 생성
+                            particles.push(new Particle(blastX, blastY, '#ff4444', 30, {
+                                type: 'warning',
+                                lifespan: 1.5,
+                                fade: true
+                            }));
+                            // 1.5초 후 폭발
+                            setTimeout(() => {
+                                for (let i = 0; i < 20; i++) {
+                                    const angle = (i / 20) * 360;
+                                    bullets.push(new Bullet(blastX, blastY, angle, this.bulletSpeed * 0.8, 'enemy'));
+                                }
+                                createExplosion(blastX, blastY, '#ff4444', 15);
+                            }, 1500);
+                            this.shootTimer = 2.0;
+                            break;
                         default: 
                             bullets.push(new Bullet(this.x, this.y, angleToPlayer, this.bulletSpeed, 'enemy')); 
                             this.shootTimer = 0.5; 
@@ -855,7 +1017,38 @@
             if (this.type === 'barrier' && this.shieldHealth > 0 && !fromBehind) { this.shieldHealth -= damage; if(this.shieldHealth <= 0) createExplosion(this.x, this.y + this.size, '#00ffff', 20); return; }
             this.health -= damage;
             if (this.health <= 0) {
-                if (player) { playerStats.totalKills++; }
+                // 분열체 특수 능력: 죽을 때 분열
+                if (this.type === 'splitter' && !this.hasSplit) {
+                    this.hasSplit = true;
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i - 1) * 60;
+                        const splitX = this.x + Math.cos(angle * Math.PI / 180) * 30;
+                        const splitY = this.y + Math.sin(angle * Math.PI / 180) * 30;
+                        const fragment = new Enemy(splitX, splitY, 'basic');
+                        fragment.size = 10;
+                        fragment.health = 8;
+                        fragment.color = '#ff3300';
+                        fragment.speed = 200;
+                        fragment.scoreValue = 50;
+                        fragment.isSplitterFragment = true; // 분열된 조각임을 표시
+                        enemies.push(fragment);
+                    }
+                    // 분열 이펙트
+                    for (let i = 0; i < 15; i++) {
+                        particles.push(new Particle(this.x, this.y, '#ff6600', 8, {
+                            type: 'spark',
+                            speed: 200,
+                            lifespan: 0.8
+                        }));
+                    }
+                }
+                
+                if (player) { 
+                    playerStats.totalKills++;
+                    // 새로운 적 타입별 킬 카운터 업데이트
+                    if (this.type === 'splitter') playerStats.splitterKills++;
+                    else if (this.type === 'summoner') playerStats.summonerKills++;
+                }
                 const scoreBonus = selectedCharacterId === 'blade' ? 1.5 : 1;
                 score += this.scoreValue * Math.floor(scoreMultiplier) * scoreBonus;
                 if (selectedCharacterId === 'pulse' && player) player.addChronoGauge(0.5);
@@ -869,11 +1062,145 @@
                 else if (Math.random() < 0.015) { powerUps.push(new PowerUpItem(this.x, this.y, 'S')); }
             }
         }
+        
+        summonMinion() {
+            if (this.minionsSpawned >= this.maxMinions) return;
+            const minionX = this.x + (Math.random() - 0.5) * 80;
+            const minionY = this.y + 30;
+            const minion = new Enemy(minionX, minionY, 'basic');
+            minion.size = 8;
+            minion.health = 5;
+            minion.color = '#cc66ff';
+            minion.speed = 120;
+            minion.scoreValue = 75;
+            minion.bulletSpeed *= 0.8;
+            enemies.push(minion);
+            this.minionsSpawned++;
+            
+            // 소환 이펙트
+            for (let i = 0; i < 10; i++) {
+                particles.push(new Particle(minionX, minionY, '#b300ff', 6, {
+                    type: 'nova',
+                    secondaryColor: '#ff80ff',
+                    speed: 100,
+                    lifespan: 0.6
+                }));
+            }
+        }
     }
+    
+    class GuidedMissile {
+        constructor(x, y, speed) {
+            this.x = x;
+            this.y = y;
+            this.speed = speed;
+            this.size = 8;
+            this.active = true;
+            this.tracking = true;
+            this.vx = 0;
+            this.vy = speed;
+            this.color = '#ff6600';
+            this.trailParticles = [];
+        }
+        
+        update(deltaTime) {
+            if (!this.active) return;
+            
+            if (this.tracking && player) {
+                const distToPlayer = Math.hypot(this.x - player.x, this.y - player.y);
+                
+                // 플레이어와 가까워지면 직진 모드로 전환
+                if (distToPlayer < 60) {
+                    this.tracking = false;
+                } else {
+                    // 플레이어 추적
+                    const angleToPlayer = Math.atan2(player.y - this.y, player.x - this.x);
+                    this.vx = Math.cos(angleToPlayer) * this.speed;
+                    this.vy = Math.sin(angleToPlayer) * this.speed;
+                }
+            }
+            
+            // 위치 업데이트
+            this.x += this.vx * deltaTime * gameSpeed;
+            this.y += this.vy * deltaTime * gameSpeed;
+            
+            // 트레일 이펙트
+            if (Math.random() < 0.3) {
+                this.trailParticles.push(new Particle(this.x, this.y, this.color, 4, {
+                    type: 'trail',
+                    lifespan: 0.5,
+                    fade: true
+                }));
+            }
+            
+            // 화면 밖으로 나가면 제거
+            if (this.x < -20 || this.x > canvas.width + 20 || this.y > canvas.height + 20) {
+                this.active = false;
+            }
+            
+            // 플레이어 충돌 검사
+            if (player && Math.hypot(this.x - player.x, this.y - player.y) < this.size + player.hitboxSize) {
+                player.takeHit();
+                this.active = false;
+                createExplosion(this.x, this.y, this.color, 8);
+            }
+        }
+        
+        draw(ctx) {
+            if (!this.active) return;
+            
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            
+            // 미사일 몸체
+            ctx.fillStyle = this.color;
+            ctx.shadowColor = this.color;
+            ctx.shadowBlur = 8;
+            ctx.beginPath();
+            ctx.moveTo(0, -this.size);
+            ctx.lineTo(-this.size/2, this.size);
+            ctx.lineTo(this.size/2, this.size);
+            ctx.closePath();
+            ctx.fill();
+            
+            // 추적 모드 표시
+            if (this.tracking) {
+                ctx.strokeStyle = '#ffaa00';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, this.size + 5, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            ctx.restore();
+        }
+    }
+    
     class Particle {
         constructor(x, y, color, size, options = {}) { this.x = x; this.y = y; this.color = color; this.size = Math.random() * size + 2; this.lifespan = options.lifespan || 1; this.initialLifespan = this.lifespan; this.options = options; this.vx = (Math.random() - 0.5) * (options.speed || 150); this.vy = (Math.random() - 0.5) * (options.speed || 150); if (options.type === 'spark') { const angle = Math.random() * Math.PI * 2; this.vx = Math.cos(angle) * 300; this.vy = Math.sin(angle) * 300; } if (options.type === 'trail') { this.vx = 0; this.vy = 0; } }
         update(deltaTime) { this.x += this.vx * deltaTime * gameSpeed; this.y += this.vy * deltaTime * gameSpeed; this.lifespan -= deltaTime; if(this.options.type === 'spark' || this.options.type === 'nova') { this.vx *= 0.9; this.vy *= 0.9; } }
-        draw(ctx) { ctx.globalAlpha = this.options.fade ? this.lifespan / this.initialLifespan : this.lifespan > 0.5 ? 1 : this.lifespan * 2; ctx.fillStyle = (this.options.type === 'nova' && Math.random() < 0.5) ? this.options.secondaryColor : this.color; ctx.beginPath(); if (this.options.type === 'warp') { ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size); } else { ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); } ctx.fill(); ctx.globalAlpha = 1; }
+        draw(ctx) { 
+            ctx.globalAlpha = this.options.fade ? this.lifespan / this.initialLifespan : this.lifespan > 0.5 ? 1 : this.lifespan * 2; 
+            ctx.fillStyle = (this.options.type === 'nova' && Math.random() < 0.5) ? this.options.secondaryColor : this.color; 
+            ctx.beginPath(); 
+            if (this.options.type === 'warp') { 
+                ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size); 
+            } else if (this.options.type === 'warning') {
+                // 경고 이펙트: 깜빡이는 원
+                const alpha = Math.sin(Date.now() * 0.01) * 0.5 + 0.5;
+                ctx.globalAlpha = alpha;
+                ctx.strokeStyle = this.color;
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            } else { 
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); 
+                ctx.fill();
+            } 
+            ctx.globalAlpha = 1; 
+        }
     }
     class PowerUpItem {
         constructor(x, y, type) { this.x = x; this.y = y; this.type = type; this.size = 12; this.speed = 80; this.angle = 0; switch(type) { case 'P': this.color = colors.powerupP; break; case 'B': this.color = colors.powerupB; break; case 'C': this.color = colors.powerupC; break; case 'S': this.color = colors.powerupS; break; } }
@@ -1121,7 +1448,7 @@
         // Powerups vs Player
         for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': const earned = 50 + Math.floor(Math.random() * 51); chronoShards += earned; playerStats.totalShardsEarned += earned; updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
-    function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
+    function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 12 && rand < 0.08) type = 'summoner'; else if (wave >= 10 && rand < 0.15) type = 'splitter'; else if (wave >= 8 && rand < 0.22) type = 'sentinel'; else if (wave >= 6 && rand < 0.32) type = 'bulwark'; else if (wave >= 4 && rand < 0.42) type = 'barrier'; else if (wave > 3 && rand < 0.57) type = 'kamikaze'; else if (wave > 2 && rand < 0.72) type = 'weaver'; else if (wave > 1 && rand < 0.85) type = 'dasher'; else if (rand < 0.95) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
     function createExplosion(x, y, color, count, options) { for (let i = 0; i < count; i++) { particles.push(new Particle(x, y, color, 5, options)); } }
     function createFireworkExplosion(x, y, color1, color2, count = 30) { for (let i = 0; i < count; i++) { const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 200 + 50; const particleColor = Math.random() > 0.5 ? color1 : color2; particles.push(new Particle(x, y, particleColor, 4, { speed: speed, lifespan: 1.5, fade: true, type: 'spark'})); } }
     let screenFlashTimer = 0; function createScreenFlash() { screenFlashTimer = 0.2; }
@@ -1221,47 +1548,122 @@
     }
 
     // --- 6. 데이터 관리 및 UI ---
-    function saveData() { localStorage.setItem('chronoBreakData_v11', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals, playerStats })); }
-    function loadData() {
-        let data = JSON.parse(localStorage.getItem('chronoBreakData_v11'));
-        if (!data) {
-            data = JSON.parse(localStorage.getItem('chronoBreakData_v10')) || {};
-            const defaultCharacters = initializeCharacterData(characters);
-            if (data.characters) {
-                Object.keys(defaultCharacters).forEach(id => {
-                    if (!data.characters[id]) { data.characters[id] = defaultCharacters[id]; }
-                });
-                data.characters = initializeCharacterData(data.characters);
-            } else {
-                data.characters = defaultCharacters;
+    function saveData() { localStorage.setItem('chronoBreakData_v12', JSON.stringify({ highScore, chronoShards, characters, upgrades, controlMode, dailyDeals, playerStats, version: 12 })); }
+    
+    function migrateData(data, fromVersion) {
+        // 버전별 마이그레이션 로직
+        if (fromVersion < 12) {
+            // v12에서 추가된 새로운 적들에 대한 킬 카운터 추가
+            if (data.playerStats) {
+                if (!data.playerStats.splitterKills) data.playerStats.splitterKills = 0;
+                if (!data.playerStats.summonerKills) data.playerStats.summonerKills = 0;
             }
-            // NOVA BUG FIX - ONE-TIME RESET
-            if (data.characters && data.characters.nova) {
-                if (data.highScore === data.characters.nova.highScore) {
-                    data.highScore = 0;
+            console.log('데이터를 v12로 마이그레이션했습니다.');
+        }
+        
+        // 캐릭터 데이터 마이그레이션
+        const defaultCharacters = initializeCharacterData(characters);
+        if (data.characters) {
+            Object.keys(defaultCharacters).forEach(id => {
+                if (!data.characters[id]) { 
+                    data.characters[id] = defaultCharacters[id];
+                    console.log(`새 캐릭터 ${id}가 추가되었습니다.`);
                 }
-                data.characters.nova.highScore = 0;
-                data.characters.nova.skins.mythic.unlocked = false;
+            });
+            data.characters = initializeCharacterData(data.characters);
+        } else {
+            data.characters = defaultCharacters;
+        }
+        
+        return data;
+    }
+    
+    function loadData() {
+        // 최신 버전 데이터 시도
+        let data = JSON.parse(localStorage.getItem('chronoBreakData_v12'));
+        let currentVersion = 12;
+        
+        if (!data) {
+            // 이전 버전들 순서대로 시도
+            const versions = ['v11', 'v10', 'v9', 'v8'];
+            for (let i = 0; i < versions.length; i++) {
+                const versionKey = 'chronoBreakData_' + versions[i];
+                data = JSON.parse(localStorage.getItem(versionKey));
+                if (data) {
+                    const fromVersion = data.version || parseInt(versions[i].substring(1));
+                    console.log(`v${fromVersion} 데이터를 발견했습니다. 마이그레이션을 시작합니다.`);
+                    data = migrateData(data, fromVersion);
+                    break;
+                }
+            }
+            
+            // 아무 데이터도 없으면 기본값으로 초기화
+            if (!data) {
+                console.log('기존 저장 데이터가 없습니다. 새로 시작합니다.');
+                data = {
+                    highScore: 0,
+                    chronoShards: 0,
+                    controlMode: 'keyboard',
+                    dailyDeals: { date: null, items: [] },
+                    upgrades: upgrades,
+                    characters: initializeCharacterData(characters),
+                    playerStats: {
+                        totalKills: 0, bossKills: 0, gamesPlayed: 0, totalScore: 0, 
+                        splitterKills: 0, summonerKills: 0
+                    },
+                    version: 12
+                };
             }
         }
+        
+        // NOVA BUG FIX - ONE-TIME RESET (기존 버그 수정 유지)
+        if (data.characters && data.characters.nova && !data.novaBugFixed) {
+            if (data.highScore === data.characters.nova.highScore) {
+                data.highScore = 0;
+            }
+            data.characters.nova.highScore = 0;
+            data.characters.nova.skins.mythic.unlocked = false;
+            data.novaBugFixed = true; // 한 번만 실행되도록 플래그 추가
+            console.log('Nova 버그가 수정되었습니다.');
+        }
 
+        // 데이터 로드
         highScore = data.highScore || 0;
         chronoShards = data.chronoShards || 0;
         controlMode = data.controlMode || 'keyboard';
         dailyDeals = data.dailyDeals || { date: null, items: [] };
         upgrades = data.upgrades || upgrades;
+        
         if (data.characters) {
             const loadedChars = initializeCharacterData(data.characters);
             Object.keys(characters).forEach(id => {
                 if (loadedChars[id]) { Object.assign(characters[id], loadedChars[id]); }
             });
         }
-        playerStats = data.playerStats || {
+        
+        // playerStats 마이그레이션 - 누락된 필드 추가
+        playerStats = data.playerStats || {};
+        const defaultStats = {
             totalKills: 0, totalGraze: 0, maxScore: 0, maxWave: 0,
             gamesPlayed: 0, totalShardsEarned: 0, unlockedCharCount: 0,
+            splitterKills: 0, summonerKills: 0, // 새로운 적 킬 카운터
             completedMissions: [], unlockedTitles: ['rookie'], activeTitle: 'rookie'
         };
+        
+        Object.keys(defaultStats).forEach(key => {
+            if (playerStats[key] === undefined) {
+                playerStats[key] = defaultStats[key];
+            }
+        });
+        
+        // 데이터 저장 (마이그레이션된 데이터를 최신 버전으로 저장)
         saveData();
+        console.log('데이터 로드 및 마이그레이션 완료:', {
+            version: data.version || 'legacy',
+            highScore, 
+            chronoShards, 
+            charactersCount: Object.keys(characters).length
+        });
     }
     function updateAllUI() {
         shardDisplays.forEach(el => el.textContent = `💎 ${chronoShards}`);
@@ -1399,6 +1801,8 @@
         colors.enemy1 = rootStyles.getPropertyValue('--enemy-color-1').trim(); colors.enemy2 = rootStyles.getPropertyValue('--enemy-color-2').trim(); colors.dasher = rootStyles.getPropertyValue('--enemy-dasher-color').trim(); colors.weaver = rootStyles.getPropertyValue('--enemy-weaver-color').trim(); colors.kamikaze = rootStyles.getPropertyValue('--enemy-kamikaze-color').trim(); colors.boss = rootStyles.getPropertyValue('--boss-color').trim(); colors.enemyBullet = rootStyles.getPropertyValue('--enemy-bullet-color').trim();
         colors.powerupP = rootStyles.getPropertyValue('--powerup-p-color').trim(); colors.powerupB = rootStyles.getPropertyValue('--powerup-b-color').trim(); colors.powerupC = rootStyles.getPropertyValue('--powerup-c-color').trim(); colors.powerupS = rootStyles.getPropertyValue('--powerup-s-color').trim();
         colors.sentinel = rootStyles.getPropertyValue('--enemy-sentinel-color').trim(); colors.bulwark = rootStyles.getPropertyValue('--enemy-bulwark-color').trim(); colors.barrier = rootStyles.getPropertyValue('--enemy-barrier-color').trim();
+        colors.splitter = rootStyles.getPropertyValue('--enemy-splitter-color').trim(); colors.summoner = rootStyles.getPropertyValue('--enemy-summoner-color').trim();
+        colors.inhibitor = rootStyles.getPropertyValue('--enemy-inhibitor-color').trim(); colors.split = rootStyles.getPropertyValue('--enemy-split-color').trim(); colors.hunter = rootStyles.getPropertyValue('--enemy-hunter-color').trim();
         
         loadData(); 
 
@@ -1420,6 +1824,9 @@
         updateAllUI(); 
         initAudio();
         
+        // 업데이트 알림 표시
+        showUpdateNotification();
+        
         startGameButton.onclick = async () => { if (audioContext && audioContext.state === 'suspended') { await audioContext.resume(); } inputHandler.setup(); startOrRestartGame(); };
         charGachaButton.onclick = buyCharacterGacha;
         controlToggleButton.onclick = () => { controlMode = (controlMode === 'keyboard') ? 'touch' : 'keyboard'; saveData(); updateAllUI(); };
@@ -1437,6 +1844,45 @@
 
         highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`;
     }
+    
+    function showUpdateNotification() {
+        const currentVersion = 12;
+        const lastSeenVersion = parseInt(localStorage.getItem('lastSeenVersion')) || 0;
+        
+        if (lastSeenVersion < currentVersion) {
+            localStorage.setItem('lastSeenVersion', currentVersion.toString());
+            
+            // 버전 업데이트 내용
+            const updateNotes = {
+                12: [
+                    '🔥 새로운 적: 분열체 (웨이브 10+)',
+                    '✨ 새로운 적: 소환술사 (웨이브 12+)', 
+                    '🛠️ 데이터 호환성 개선',
+                    '📊 새로운 통계 추가'
+                ]
+            };
+            
+            if (lastSeenVersion > 0) {
+                console.log('🎉 크로노 브레이크 v1.2 업데이트!');
+                console.log('새로운 기능:');
+                updateNotes[currentVersion]?.forEach(note => console.log('  ' + note));
+            }
+        }
+        
+        // 버전 정보를 메인 화면에 표시
+        const versionInfo = document.createElement('div');
+        versionInfo.style.cssText = `
+            position: absolute; 
+            bottom: 10px; 
+            right: 15px; 
+            font-size: 0.6em; 
+            color: #666; 
+            pointer-events: none;
+        `;
+        versionInfo.textContent = 'v1.2';
+        mainMenuScreen.appendChild(versionInfo);
+    }
+    
     window.addEventListener('load', init);
     </script>
 </body>
