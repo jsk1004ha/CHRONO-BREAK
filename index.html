@@ -307,11 +307,11 @@
     const TITLES = {
         rookie: { name: "신입 파일럿", desc: "게임을 시작하면 획득" },
         scorer: { name: "스코어러", desc: "100,000점 달성 미션 완료", requiresMission: 'score100k' },
-        hunter: { name: "사냥꾼", desc: "1,000기 격파 미션 완료", requiresMission: 'kills1000' },
-        dancer: { name: "탄막 무용수", desc: "500회 그레이즈 미션 완료", requiresMission: 'graze500' },
+        hunter: { name: "사냥꾼", desc: "1,0000기 격파 미션 완료", requiresMission: 'kills10000' },
+        dancer: { name: "탄막 무용수", desc: "5000회 그레이즈 미션 완료", requiresMission: 'graze5000' },
         veteran: { name: "베테랑", desc: "웨이브 10 도달 미션 완료", requiresMission: 'wave10' },
-        collector: { name: "수집가", desc: "캐릭터 5종 해금 미션 완료", requiresMission: 'unlock5' },
-        rich: { name: "시간 부자", desc: "20,000 샤드 획득 미션 완료", requiresMission: 'shards20k' },
+        collector: { name: "수집가", desc: "캐릭터 10종 해금 미션 완료", requiresMission: 'unlock10' },
+        rich: { name: "시간 부자", desc: "100,000 샤드 획득 미션 완료", requiresMission: 'shards100k' },
         chronoMaster: { name: "크로노 마스터", desc: "신화 스킨 획득", requiresMythic: true },
     };
 
@@ -348,10 +348,11 @@
             this.dashCooldown = 0; this.dashMaxCooldown = 1.5;
             this.parryCooldown = 0; this.parryMaxCooldown = 2.0; // ECHO BALANCE
             this.isParrying = false; this.parryTimer = 0; this.parryPower = 0;
+            this.phaseBoostTimer = 0; this.phaseBoostDuration = 3.0;
             this.orbiters = []; this.orbiterCooldown = 0;
             this.isShielding = false; this.shieldTimer = 0; this.shieldPower = 0;
-            this.turretCooldown = 0; this.turretMaxCooldown = 8;
-            this.summonCooldown = 0; this.summonMaxCooldown = 12;
+            this.turretCooldown = 0; this.turretMaxCooldown = 12;
+            this.summonCooldown = 0; this.summonMaxCooldown = 15;
         }
         update(deltaTime, input) {
             if (this.skinData.hasTrail) { particles.push(new Particle(this.x, this.y, this.accentColor, 3, { lifespan: 0.3, fade: true, type: 'trail' })); }
@@ -362,17 +363,17 @@
                 const effectiveSpeed = this.speed * deltaTime * (gameSpeed < 1 ? 1.5 : 1); this.x += moveX * effectiveSpeed; this.y += moveY * effectiveSpeed;
                 this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x)); this.y = Math.max(this.size, Math.min(canvas.height - this.size, this.y));
             }
-            this.shootCooldown -= deltaTime;
+            let shootCooldownMultiplier = 1;
+            if (selectedCharacterId === 'phase' && this.phaseBoostTimer > 0) {
+                shootCooldownMultiplier = 0.3; // 3x faster shooting
+            }
+            this.shootCooldown -= deltaTime / shootCooldownMultiplier;
             
             if (selectedCharacterId === 'nova') {
                 if (!isMoving) {
                     this.chargeLevel = Math.min(this.chargeMax, this.chargeLevel + deltaTime);
-                } else {
-                    if (this.chargeLevel >= this.chargeMax) {
-                        this.shoot(); 
-                    }
-                    this.chargeLevel = 0;
                 }
+                // When moving, the main shoot loop handles firing. Don't reset charge here.
             }
             
             if (this.shootCooldown <= 0 && !this.isShielding && !(selectedCharacterId === 'nova' && !isMoving)) {
@@ -389,6 +390,7 @@
             this.turretCooldown = Math.max(0, this.turretCooldown - deltaTime);
             this.summonCooldown = Math.max(0, this.summonCooldown - deltaTime);
             this.parryCooldown = Math.max(0, this.parryCooldown - deltaTime);
+            this.phaseBoostTimer = Math.max(0, this.phaseBoostTimer - deltaTime);
 
             if (selectedCharacterId === 'rift') { this.blinkCooldown = Math.max(0, this.blinkCooldown - deltaTime); if (bombPressed && this.blinkCooldown <= 0) this.useBlink(isMoving ? {x: moveX, y: moveY} : null); }
             else if (selectedCharacterId === 'phase') { this.dashCooldown = Math.max(0, this.dashCooldown - deltaTime); if (bombPressed && this.dashCooldown <= 0) this.useDash(moveX, moveY); }
@@ -424,12 +426,21 @@
             switch (selectedCharacterId) {
                 case 'tempest': return;
                 case 'arbiter': for(let i=0; i < 3 + p; i++) { bullets.push(new Bullet(this.x, this.y, -90 + (Math.random() - 0.5) * 45, 700 + Math.random() * 200, 'player', bulletOptions)); } break;
-                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, this.y - 30, -90, 2000, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 2, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break; // No default shot
+                case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, canvas.height / 2, -90, 0, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 5, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break; // No default shot
                 case 'blade': bullets.push(new Bullet(this.x, this.y, -90, 1200, 'player', { ...bulletOptions, isPiercing: true, width: 4 + p, height: 40 })); break;
                 case 'pulse': bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, isWave: true, size: 15 + p * 5, lifespan: 0.2 })); break;
                 case 'spectre': bullets.push(new Bullet(this.x, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 3) bullets.push(new Bullet(this.x - 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); if (p >= 5) bullets.push(new Bullet(this.x + 15, this.y, -90, 400, 'player', { ...bulletOptions, isHoming: true })); break;
                 case 'guardian': bullets.push(new Bullet(this.x, this.y, -90, 700, 'player', bulletOptions)); for(let i=1; i<=Math.floor(p/2); i++) { bullets.push(new Bullet(this.x, this.y, -90 - i * 15, 700, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -90 + i * 15, 700, 'player', bulletOptions)); } break;
-                default: if (p === 1) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); } else if (p === 2) { bullets.push(new Bullet(this.x - 5, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 5, this.y, -90, 800, 'player', bulletOptions)); } else if (p === 3) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -85, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -95, 800, 'player', bulletOptions)); } else if (p === 4) { bullets.push(new Bullet(this.x - 8, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 8, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x - 4, this.y, -85, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 4, this.y, -95, 800, 'player', bulletOptions)); } else if (p >= 5) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -80, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x, this.y, -100, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x - 10, this.y, -90, 800, 'player', bulletOptions)); bullets.push(new Bullet(this.x + 10, this.y, -90, 800, 'player', bulletOptions)); } break;
+                default: 
+                    let bulletSize = selectedCharacterId === 'phase' && this.phaseBoostTimer > 0 ? 8 : 5; // Bigger bullets during boost
+                    let enhancedOptions = {...bulletOptions, size: bulletSize};
+                    
+                    if (p === 1) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', enhancedOptions)); } 
+                    else if (p === 2) { bullets.push(new Bullet(this.x - 5, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x + 5, this.y, -90, 800, 'player', enhancedOptions)); } 
+                    else if (p === 3) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x, this.y, -85, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x, this.y, -95, 800, 'player', enhancedOptions)); } 
+                    else if (p === 4) { bullets.push(new Bullet(this.x - 8, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x + 8, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x - 4, this.y, -85, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x + 4, this.y, -95, 800, 'player', enhancedOptions)); } 
+                    else if (p >= 5) { bullets.push(new Bullet(this.x, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x, this.y, -80, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x, this.y, -100, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x - 10, this.y, -90, 800, 'player', enhancedOptions)); bullets.push(new Bullet(this.x + 10, this.y, -90, 800, 'player', enhancedOptions)); } 
+                    break;
             }
         }
         takeHit() { if (this.isInvincible) return; if (this.isParrying) { this.parryPower++; return; } if (this.isShielding) return; playSound('playerHit'); screenShake = 15; this.lives--; this.power = Math.max(1, this.power - 1); if (selectedCharacterId === 'tempest') this.orbiters.pop(); this.isInvincible = true; this.invincibleTimer = 2; createExplosion(this.x, this.y, this.color, 40); if (this.lives < 0) { gameOver(); } }
@@ -482,28 +493,111 @@
             }
             this.shootTimer -= deltaTime * gameSpeed; if (this.shootTimer <= 0 && this.type !== 'sentinel' && this.type !== 'boss') this.shoot();
             if (this.type === 'boss') {
-                if (this.y < 150) { this.y += this.speed * deltaTime; } else { this.y = 150; }
-                this.patternTimer += deltaTime; this.shootTimer -= deltaTime;
+                // Movement
+                if (this.y < 150) { 
+                    this.y += this.speed * deltaTime; 
+                } else { 
+                    this.y = 150;
+                    this.moveTimer -= deltaTime;
+                    if (this.moveTimer <= 0) {
+                        this.moveTargetX = Math.random() * (canvas.width * 0.6) + (canvas.width * 0.2);
+                        this.moveTimer = Math.random() * 3 + 2; // Move every 2-5 seconds
+                    }
+                    this.x += (this.moveTargetX - this.x) * 0.5 * deltaTime;
+                }
+
+                this.patternTimer += deltaTime; 
+                this.shootTimer -= deltaTime;
                 if(this.shootTimer <= 0) this.shoot();
+
                 if (this.patternTimer >= this.patternDuration) {
                     this.patternTimer = 0;
                     const healthRatio = this.health / this.maxHealth;
-                    if (healthRatio < 0.2) this.pattern = 'desperate';
-                    else if (healthRatio < 0.4) this.pattern = 'ricochet';
-                    else if (healthRatio < 0.6) this.pattern = 'sunburst';
-                    else if (healthRatio < 0.8) this.pattern = 'weave';
-                    else this.pattern = 'crossfire';
+                    const patterns = ['crossfire', 'weave', 'sunburst', 'ricochet', 'spiral', 'spawn_minions'];
+                    let nextPattern;
+                    if (healthRatio < 0.2) {
+                        nextPattern = 'desperate';
+                    } else if (healthRatio < 0.5) {
+                        // Under 50% health, add more difficult patterns to the mix
+                        nextPattern = patterns.concat(['sunburst', 'ricochet', 'desperate'])[Math.floor(Math.random() * 9)];
+                    } else {
+                        nextPattern = patterns[Math.floor(Math.random() * patterns.length)];
+                    }
+                    this.pattern = nextPattern;
                 }
             }
             if (this.y > canvas.height + this.size) this.health = 0;
         }
         draw(ctx) {
-            ctx.fillStyle = this.color; ctx.beginPath();
-            if (this.type === 'basic' || this.type === 'bulwark') { ctx.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2); }
-            else if (this.type === 'sentinel') { ctx.moveTo(this.x, this.y - this.size); ctx.lineTo(this.x - this.size, this.y + this.size); ctx.lineTo(this.x + this.size, this.y + this.size); }
-            else { const sides = this.type === 'shooter' ? 6 : this.type === 'boss' ? 8 : 5; for (let i = 0; i < sides; i++) { const angle = (i / sides) * Math.PI * 2, xPos = this.x + this.size * Math.cos(angle), yPos = this.y + this.size * Math.sin(angle); if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos); } }
-            ctx.closePath(); ctx.fill();
-            if (this.isElite) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); }
+            ctx.shadowColor = this.isElite ? '#FFD700' : this.color;
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = this.color;
+            ctx.strokeStyle = this.isElite ? '#FFD700' : '#FFF';
+            ctx.lineWidth = this.isElite ? 3 : 1.5;
+
+            ctx.beginPath();
+            switch(this.type) {
+                case 'basic':
+                    ctx.moveTo(this.x, this.y - this.size);
+                    ctx.lineTo(this.x + this.size * 0.8, this.y + this.size * 0.8);
+                    ctx.lineTo(this.x - this.size * 0.8, this.y + this.size * 0.8);
+                    break;
+                case 'shooter':
+                    ctx.moveTo(this.x - this.size, this.y - this.size * 0.5);
+                    ctx.lineTo(this.x, this.y + this.size);
+                    ctx.lineTo(this.x + this.size, this.y - this.size * 0.5);
+                    ctx.lineTo(this.x, this.y - this.size * 0.2);
+                    break;
+                case 'dasher':
+                    ctx.moveTo(this.x, this.y + this.size);
+                    ctx.lineTo(this.x - this.size, this.y - this.size);
+                    ctx.lineTo(this.x, this.y - this.size * 0.5);
+                    ctx.lineTo(this.x + this.size, this.y - this.size);
+                    break;
+                case 'weaver':
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i / 5) * Math.PI * 2;
+                        const radius = i % 2 === 0 ? this.size : this.size * 0.5;
+                        const xPos = this.x + radius * Math.cos(angle);
+                        const yPos = this.y + radius * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos);
+                    }
+                    break;
+                case 'kamikaze':
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    break;
+                case 'bulwark':
+                    ctx.rect(this.x - this.size, this.y - this.size, this.size * 2, this.size * 2);
+                    break;
+                case 'sentinel':
+                    ctx.moveTo(this.x, this.y - this.size);
+                    ctx.lineTo(this.x - this.size, this.y + this.size);
+                    ctx.lineTo(this.x + this.size, this.y + this.size);
+                    break;
+                case 'barrier':
+                    ctx.moveTo(this.x - this.size, this.y - this.size);
+                    ctx.lineTo(this.x + this.size, this.y - this.size);
+                    ctx.lineTo(this.x + this.size * 0.7, this.y + this.size);
+                    ctx.lineTo(this.x - this.size * 0.7, this.y + this.size);
+                    break;
+                case 'boss':
+                     for (let i = 0; i < 8; i++) {
+                        const angle = (i / 8) * Math.PI * 2;
+                        const radius = i % 2 === 0 ? this.size : this.size * 0.7;
+                        const xPos = this.x + radius * Math.cos(angle);
+                        const yPos = this.y + radius * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(xPos, yPos); else ctx.lineTo(xPos, yPos);
+                    }
+                    break;
+                default:
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    break;
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
             if (this.type === 'barrier' && this.shieldHealth > 0) { ctx.strokeStyle = '#00ffff'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(this.x - this.size, this.y + this.size); ctx.lineTo(this.x + this.size, this.y + this.size); ctx.stroke(); }
             if(this.type === 'boss') { const barWidth = canvas.width * 0.8, barX = (canvas.width - barWidth) / 2; ctx.fillStyle = 'rgba(50,50,50,0.8)'; ctx.fillRect(barX, 10, barWidth, 10); ctx.fillStyle = this.color; ctx.fillRect(barX, 10, barWidth * (this.health / this.maxHealth), 10); }
             if (this.type === 'sentinel' && this.laserCharge > this.laserMaxCharge - 1) { ctx.strokeStyle = 'red'; ctx.globalAlpha = 0.5; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(player.x, player.y); ctx.stroke(); ctx.globalAlpha = 1.0; }
@@ -520,13 +614,45 @@
                 case 'boss':
                     const pTimer = this.patternTimer;
                     switch(this.pattern) {
-                        case 'crossfire': for(let i=0; i<2; i++) bullets.push(new Bullet(this.x, this.y, angleToPlayer + i * 20 - 10, this.bulletSpeed * 1.1, 'enemy')); this.shootTimer = 0.3; break;
-                        case 'weave': for (let i = 0; i < 5; i++) bullets.push(new Bullet(canvas.width * (pTimer/this.patternDuration) + i*20 - 40, -20, 90, this.bulletSpeed * 0.5, 'enemy')); this.shootTimer = 0.1; break;
-                        case 'sunburst': for (let i = 0; i < 36; i++) bullets.push(new Bullet(this.x, this.y, i * 10, this.bulletSpeed, 'enemy')); this.shootTimer = 1.5; break;
-                        case 'ricochet': bullets.push(new Bullet(this.x, this.y, pTimer * 40, this.bulletSpeed, 'enemy', {bouncesLeft: 1})); this.shootTimer = 0.2; break;
-                        case 'desperate': bullets.push(new Bullet(this.x, this.y, angleToPlayer + Math.random()*40-20, this.bulletSpeed * 1.5, 'enemy')); if(Math.random() < 0.1) bullets.push(new Bullet(this.x, this.y, Math.random()*360, this.bulletSpeed * 0.8, 'enemy')); this.shootTimer = 0.1; break;
-                        default: bullets.push(new Bullet(this.x, this.y, pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); bullets.push(new Bullet(this.x, this.y, -pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); this.shootTimer = 0.1; break;
-                    } break;
+                        case 'crossfire': 
+                            for(let i=0; i<2; i++) bullets.push(new Bullet(this.x, this.y, angleToPlayer + i * 20 - 10, this.bulletSpeed * 1.1, 'enemy')); 
+                            this.shootTimer = 0.3; 
+                            break;
+                        case 'weave': 
+                            for (let i = 0; i < 5; i++) bullets.push(new Bullet(canvas.width * (pTimer/this.patternDuration) + i*20 - 40, -20, 90, this.bulletSpeed * 0.5, 'enemy')); 
+                            this.shootTimer = 0.1; 
+                            break;
+                        case 'sunburst': 
+                            for (let i = 0; i < 36; i++) bullets.push(new Bullet(this.x, this.y, i * 10 + pTimer * 20, this.bulletSpeed, 'enemy')); 
+                            this.shootTimer = 1.5; 
+                            break;
+                        case 'ricochet': 
+                            bullets.push(new Bullet(this.x, this.y, pTimer * 40, this.bulletSpeed, 'enemy', {bouncesLeft: 2})); 
+                            this.shootTimer = 0.2; 
+                            break;
+                        case 'spiral':
+                            bullets.push(new Bullet(this.x, this.y, pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); 
+                            bullets.push(new Bullet(this.x, this.y, -pTimer * 50, this.bulletSpeed * 0.9, 'enemy')); 
+                            this.shootTimer = 0.05; 
+                            break;
+                        case 'spawn_minions':
+                            for(let i=0; i<3; i++) {
+                                enemies.push(new Enemy(this.x + (i-1)*50, this.y, 'dasher'));
+                            }
+                            this.shootTimer = 3.0;
+                            this.patternTimer = this.patternDuration; // Immediately switch to next pattern
+                            break;
+                        case 'desperate': 
+                            bullets.push(new Bullet(this.x, this.y, angleToPlayer + Math.random()*40-20, this.bulletSpeed * 1.5, 'enemy')); 
+                            if(Math.random() < 0.1) bullets.push(new Bullet(this.x, this.y, Math.random()*360, this.bulletSpeed * 0.8, 'enemy')); 
+                            this.shootTimer = 0.1; 
+                            break;
+                        default: 
+                            bullets.push(new Bullet(this.x, this.y, angleToPlayer, this.bulletSpeed, 'enemy')); 
+                            this.shootTimer = 0.5; 
+                            break;
+                    } 
+                    break;
             }
         }
         takeDamage(damage, fromBehind = false) {
@@ -583,15 +709,25 @@
             ctx.globalAlpha = 1;
         }
         shoot() {
-            this.shootCooldown = 1.0 / (1 + this.power * 0.2);
-            let closestEnemy = null, minDist = Infinity;
-            for (const enemy of enemies) {
-                const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y);
-                if (dist < minDist) { minDist = dist; closestEnemy = enemy; }
-            }
-            if (closestEnemy) {
-                const angleToTarget = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x) * 180 / Math.PI;
-                bullets.push(new Bullet(this.x, this.y, angleToTarget, 500, 'player', {color: this.color}));
+            this.shootCooldown = 0.2 / (1 + this.power * 0.3); // Much faster fire rate
+            
+            // Enhanced bullets that clear enemy projectiles
+            for (let i = 0; i < 3 + this.power; i++) {
+                let closestEnemy = null, minDist = Infinity;
+                for (const enemy of enemies) {
+                    const dist = Math.hypot(this.x - enemy.x, this.y - enemy.y);
+                    if (dist < minDist) { minDist = dist; closestEnemy = enemy; }
+                }
+                if (closestEnemy) {
+                    const angleToTarget = Math.atan2(closestEnemy.y - this.y, closestEnemy.x - this.x) * 180 / Math.PI + (Math.random() - 0.5) * 20;
+                    bullets.push(new Bullet(this.x, this.y, angleToTarget, 800, 'player', {
+                        color: this.color, 
+                        isPiercing: true, 
+                        width: 8, 
+                        height: 15,
+                        clearsBullets: true // Special property for turret bullets
+                    }));
+                }
             }
         }
     }
@@ -607,8 +743,9 @@
             this.lifespan -= deltaTime * gameSpeed;
             this.shootCooldown -= deltaTime * gameSpeed;
             if (player) {
-                const targetX = player.x + (this.x > player.x ? 30 : -30);
-                const targetY = player.y + 30;
+                // Follow player and focus fire
+                const targetX = player.x + (this.x > player.x ? 40 : -40);
+                const targetY = player.y + 20;
                 const dx = targetX - this.x, dy = targetY - this.y;
                 const dist = Math.hypot(dx, dy);
                 if (dist > 1) {
@@ -625,19 +762,144 @@
             ctx.fill();
         }
         shoot() {
-            this.shootCooldown = 1.2 / (1 + this.power * 0.1);
-            if (enemies.length > 0) {
-                bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', {size: 4, color: this.color}));
+            this.shootCooldown = 0.1; // Very fast interception rate
+            
+            // Prioritize intercepting enemy bullets over attacking enemies
+            let targetBullet = null;
+            let minBulletDist = Infinity;
+            for (const bullet of bullets) {
+                if (bullet.owner === 'enemy') {
+                    const dist = Math.hypot(this.x - bullet.x, this.y - bullet.y);
+                    if (dist < minBulletDist && dist < 200) { // Only target nearby bullets
+                        minBulletDist = dist;
+                        targetBullet = bullet;
+                    }
+                }
+            }
+            
+            if (targetBullet) {
+                const angleToTarget = Math.atan2(targetBullet.y - this.y, targetBullet.x - this.x) * 180 / Math.PI;
+                bullets.push(new Bullet(this.x, this.y, angleToTarget, 900, 'player', {
+                    size: 4, 
+                    color: this.color,
+                    isInterceptor: true // Special property for ally bullets
+                }));
+            } else if (enemies.length > 0) {
+                // If no bullets to intercept, attack enemies
+                let target = enemies[0];
+                if (player) {
+                    let closestDist = Infinity;
+                    enemies.forEach(e => {
+                        const dist = Math.hypot(player.x - e.x, player.y - e.y);
+                        if (dist < closestDist) {
+                            closestDist = dist;
+                            target = e;
+                        }
+                    });
+                }
+                const angleToTarget = Math.atan2(target.y - this.y, target.x - this.x) * 180 / Math.PI;
+                bullets.push(new Bullet(this.x, this.y, angleToTarget, 700, 'player', {size: 5, color: this.color}));
             }
         }
     }
 
     // --- 4. 핵심 로직 및 게임 루프 ---
-    const inputHandler = { keys: {}, touch: { x: 0, y: 0, active: false, chronoActive: false, bombPressed: false }, setup() { document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'none'); if (controlMode === 'touch') { document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'flex'); canvas.addEventListener('touchstart', this.handleTouch.bind(this)); canvas.addEventListener('touchmove', this.handleTouch.bind(this)); canvas.addEventListener('touchend', e => { this.touch.active = false; }); mobileChronoButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.chronoActive = true; mobileChronoButton.classList.add('active'); }); mobileChronoButton.addEventListener('touchend', e => { e.preventDefault(); this.touch.chronoActive = false; mobileChronoButton.classList.remove('active'); }); mobileBombButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.bombPressed = true; mobileBombButton.classList.add('active'); }); mobileBombButton.addEventListener('touchend', e => { e.preventDefault(); mobileBombButton.classList.remove('active'); }); } else { document.addEventListener('keydown', e => { this.keys[e.key] = true; }); document.addEventListener('keyup', e => { this.keys[e.key] = false; }); } }, handleTouch(e) { e.preventDefault(); this.touch.active = true; const rect = canvas.getBoundingClientRect(); this.touch.x = e.touches[0].clientX - rect.left; this.touch.y = e.touches[0].clientY - rect.top; } };
+    const inputHandler = { 
+        keys: {}, 
+        touch: { x: 0, y: 0, active: false, chronoActive: false, bombPressed: false }, 
+        setup() { 
+            document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'none'); 
+            if (controlMode === 'touch') { 
+                document.querySelectorAll('.mobile-control').forEach(el => el.style.display = 'flex'); 
+                canvas.addEventListener('touchstart', this.handleTouch.bind(this)); 
+                canvas.addEventListener('touchmove', this.handleTouch.bind(this)); 
+                canvas.addEventListener('touchend', e => { this.touch.active = false; }); 
+                mobileChronoButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.chronoActive = true; mobileChronoButton.classList.add('active'); }); 
+                mobileChronoButton.addEventListener('touchend', e => { e.preventDefault(); this.touch.chronoActive = false; mobileChronoButton.classList.remove('active'); }); 
+                mobileBombButton.addEventListener('touchstart', e => { e.preventDefault(); this.touch.bombPressed = true; mobileBombButton.classList.add('active'); }); 
+                mobileBombButton.addEventListener('touchend', e => { e.preventDefault(); mobileBombButton.classList.remove('active'); }); 
+            } else { 
+                document.addEventListener('keydown', e => { this.keys[e.key] = true; }); 
+                document.addEventListener('keyup', e => { this.keys[e.key] = false; }); 
+            } 
+        }, 
+        handleTouch(e) { 
+            e.preventDefault(); 
+            this.touch.active = true; 
+            const rect = canvas.getBoundingClientRect(); 
+            this.touch.x = e.touches[0].clientX - rect.left; 
+            this.touch.y = e.touches[0].clientY - rect.top; 
+        } 
+    };
     function checkCollisions() {
-        for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'player') continue; const damage = 10 + player.power; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(b.x - e.x, b.y - e.y); if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) { if (b.special.isPiercing) { if (b.hitEnemies.has(e)) continue; b.hitEnemies.add(e); } e.takeDamage(damage, b.y < e.y); if (!b.special.isPiercing && !b.special.isWave) { bullets.splice(i, 1); break; } } } }
+        // Player bullets vs Enemies and Enemy bullets
+        for (let i = bullets.length - 1; i >= 0; i--) {
+            const b = bullets[i];
+            if (!b || b.owner !== 'player') continue;
+            const damage = 10 + player.power;
+            
+            // Special handling for turret bullets that clear enemy bullets
+            if (b.special.clearsBullets) {
+                for (let k = bullets.length - 1; k >= 0; k--) {
+                    const enemyBullet = bullets[k];
+                    if (enemyBullet.owner === 'enemy' && Math.hypot(b.x - enemyBullet.x, b.y - enemyBullet.y) < 20) {
+                        createExplosion(enemyBullet.x, enemyBullet.y, b.color, 2);
+                        bullets.splice(k, 1);
+                        if (k < i) i--; // Adjust index
+                    }
+                }
+            }
+            
+            // Ally interceptor bullets vs enemy bullets
+            if (b.special.isInterceptor) {
+                for (let k = bullets.length - 1; k >= 0; k--) {
+                    const enemyBullet = bullets[k];
+                    if (enemyBullet.owner === 'enemy' && Math.hypot(b.x - enemyBullet.x, b.y - enemyBullet.y) < 15) {
+                        createExplosion(enemyBullet.x, enemyBullet.y, b.color, 3);
+                        bullets.splice(k, 1);
+                        bullets.splice(i, 1);
+                        if (k < i) i--;
+                        break;
+                    }
+                }
+                continue;
+            }
+            
+            for (let j = enemies.length - 1; j >= 0; j--) {
+                const e = enemies[j];
+                if (!e) continue;
+
+                if (b.special.isLaser) {
+                    const laserRect = { x: b.x - b.width / 2, y: 0, width: b.width, height: canvas.height };
+                    const closestX = Math.max(laserRect.x, Math.min(e.x, laserRect.x + laserRect.width));
+                    const closestY = Math.max(laserRect.y, Math.min(e.y, laserRect.y + laserRect.height));
+                    const distanceSquared = (e.x - closestX)**2 + (e.y - closestY)**2;
+                    if (distanceSquared < (e.size * e.size)) {
+                        e.takeDamage(damage * 1.5, b.y < e.y); // Continuous damage, slightly boosted
+                    }
+                } else {
+                    const dist = Math.hypot(b.x - e.x, b.y - e.y);
+                    if (dist < e.size + (b.special.isWave ? b.size : (b.size || 5))) {
+                        if (b.special.isPiercing) {
+                            if (b.hitEnemies.has(e)) continue;
+                            b.hitEnemies.add(e);
+                        }
+                        e.takeDamage(damage, b.y < e.y);
+                        if (!b.special.isPiercing && !b.special.isWave) {
+                            bullets.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
         if (player && player.orbiters) { for (const orb of player.orbiters) { const damage = (5 + player.power) * 0.2; for (let j = enemies.length - 1; j >= 0; j--) { const e = enemies[j]; if (!e) continue; const dist = Math.hypot(orb.x - e.x, orb.y - e.y); if (dist < e.size + orb.size) { e.takeDamage(damage); } } } }
+        
+        // Enemy bullets vs Player
         if (player && !player.isInvincible) { for (let i = bullets.length - 1; i >= 0; i--) { const b = bullets[i]; if (!b || b.owner !== 'enemy') continue; if (player.isShielding) { const shieldDist = Math.hypot(b.x - player.x, b.y - player.y); if (shieldDist < 30 + b.size) { player.shieldPower++; createExplosion(b.x, b.y, player.color, 3); bullets.splice(i, 1); continue; } } if (!b.grazed) { const grazeDist = Math.hypot(b.x - player.x, b.y - player.y); if (grazeDist < player.grazeRadius + b.size) { b.grazed = true; scoreMultiplier += 0.1; player.addChronoGauge(3); playSound('graze'); playerStats.totalGraze++; } } const hitDist = Math.hypot(b.x - player.x, b.y - player.y); if (hitDist < player.hitboxSize + b.size) { player.takeHit(); bullets.splice(i, 1); scoreMultiplier = 1; break; } } }
+        
+        // Powerups vs Player
         for (let i = powerUps.length - 1; i >= 0; i--) { const p = powerUps[i]; if (player) { const dist = Math.hypot(p.x - player.x, p.y - player.y); if (dist < player.size + p.size + (upgrades.magnet.level > 0 ? 50 : 0)) { playSound('itemGet', 1.0); createExplosion(p.x, p.y, p.color, 10); switch(p.type) { case 'P': player.power++; break; case 'B': player.bombs = Math.min(5, player.bombs + 1); break; case 'C': player.addChronoGauge(50); break; case 'S': const earned = 50 + Math.floor(Math.random() * 51); chronoShards += earned; playerStats.totalShardsEarned += earned; updateAllUI(); break; } powerUps.splice(i, 1); } } }
     }
     function spawnEnemies(deltaTime) { waveTimer += deltaTime; const waveDuration = 45; if (waveTimer > waveDuration) { wave++; waveTimer = 0; waveClearBonus += 10; if (wave > 0 && wave % 3 === 0 && !enemies.some(e => e.type === 'boss')) { enemies.push(new Enemy(canvas.width / 2, -50, 'boss')); return; } } if (!enemies.some(e => e.type === 'boss')) { const spawnRate = 0.03 * (1 + wave * 0.20) * gameSpeed; if (Math.random() < spawnRate) { const x = Math.random() * canvas.width; const rand = Math.random(); let type = 'basic'; if (wave >= 8 && rand < 0.1) type = 'sentinel'; else if (wave >= 6 && rand < 0.2) type = 'bulwark'; else if (wave >= 4 && rand < 0.3) type = 'barrier'; else if (wave > 3 && rand < 0.45) type = 'kamikaze'; else if (wave > 2 && rand < 0.6) type = 'weaver'; else if (wave > 1 && rand < 0.75) type = 'dasher'; else if (rand < 0.9) type = 'shooter'; enemies.push(new Enemy(x, -20, type)); } } }
@@ -690,7 +952,7 @@
         ctx.restore();
         updateInGameUI();
     }
-    function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `PARRY ${player.parryCooldown > 0 ? Math.ceil(player.parryCooldown) : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; case 'sentry': specialText = `TURRET ${player.turretCooldown > 0 ? Math.ceil(player.turretCooldown) : 'RDY'}`; break; case 'conjuror': specialText = `SUMMON ${player.summonCooldown > 0 ? Math.ceil(player.summonCooldown) : 'RDY'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } }
+    function updateInGameUI() { scoreEl.textContent = `SCORE: ${Math.floor(score)}`; highScoreEl.textContent = `HIGH: ${Math.floor(highScore)}`; if (player) { let lifeText = ''; for(let i=0; i<player.lives; i++) lifeText += '♥'; lifeInfoEl.textContent = lifeText; let specialText = ''; switch(selectedCharacterId) { case 'rift': specialText = `BLINK ${player.blinkCooldown > 0 ? Math.ceil(player.blinkCooldown) : 'RDY'}`; break; case 'phase': specialText = `DASH ${player.dashCooldown > 0 ? Math.ceil(player.dashCooldown) : 'RDY'}`; break; case 'echo': specialText = `패링 ${player.parryCooldown > 0 ? Math.ceil(player.parryCooldown) : 'RDY'}`; break; case 'aegis': specialText = `SHIELD ${player.isShielding ? 'ON' : 'OFF'}`; break; case 'sentry': specialText = `TURRET ${player.turretCooldown > 0 ? Math.ceil(player.turretCooldown) : 'RDY'}`; break; case 'conjuror': specialText = `SUMMON ${player.summonCooldown > 0 ? Math.ceil(player.summonCooldown) : 'RDY'}`; break; default: for(let i=0; i<player.bombs; i++) specialText += '★'; break; } bombInfoEl.textContent = specialText; chronoGaugeBarEl.style.width = `${player.chronoGauge}%`; } }
     function gameLoop(timestamp) { if (!lastTime) lastTime = timestamp; const deltaTime = Math.min(0.1, (timestamp - lastTime) / 1000); lastTime = timestamp; if (gameState === 'playing') update(deltaTime); draw(); animationFrameId = requestAnimationFrame(gameLoop); }
     function gameOver() {
         gameState = 'gameOver';
@@ -920,6 +1182,22 @@
         colors.sentinel = rootStyles.getPropertyValue('--enemy-sentinel-color').trim(); colors.bulwark = rootStyles.getPropertyValue('--enemy-bulwark-color').trim(); colors.barrier = rootStyles.getPropertyValue('--enemy-barrier-color').trim();
         
         loadData(); 
+
+        // DEBUG: Unlock all characters and skins
+        const isDebug = false;
+        if (isDebug) {
+            Object.values(characters).forEach(char => {
+                char.unlocked = true;
+                if (char.skins) {
+                    Object.values(char.skins).forEach(skin => {
+                        skin.unlocked = true;
+                    });
+                }
+            });
+            chronoShards = 999999; // Set a large amount of shards for testing
+            console.log("DEBUG MODE: All characters, skins, and 999999 shards have been unlocked.");
+        }
+        
         updateAllUI(); 
         initAudio();
         
