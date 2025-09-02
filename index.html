@@ -375,7 +375,7 @@
             this.chaosTimer = 0; this.chaosPattern = 0; // Chaos randomness
             this.orbiters = []; this.orbiterCooldown = 0;
             this.isShielding = false; this.shieldTimer = 0; this.shieldPower = 0;
-            this.turretCooldown = 0; this.turretMaxCooldown = 12;
+            this.turretCooldown = 0; this.turretMaxCooldown = 18; // Increased cooldown
             this.summonCooldown = 0; this.summonMaxCooldown = 15;
         }
         update(deltaTime, input) {
@@ -547,6 +547,19 @@
                         })); 
                     }
                     break;
+                case 'sentry':
+                    // Weakened standard shot for balance (since turrets provide main damage)
+                    if (p === 1) { 
+                        bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); // Reduced speed and damage
+                    } else if (p === 2) { 
+                        bullets.push(new Bullet(this.x - 5, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); 
+                        bullets.push(new Bullet(this.x + 5, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); 
+                    } else { 
+                        bullets.push(new Bullet(this.x - 10, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); 
+                        bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); 
+                        bullets.push(new Bullet(this.x + 10, this.y, -90, 600, 'player', { ...bulletOptions, damage: 6 })); 
+                    }
+                    break;
                 case 'nova': if (this.chargeLevel >= this.chargeMax) { playSound('laser', 0.8); bullets.push(new Bullet(this.x, canvas.height / 2, -90, 0, 'player', { ...bulletOptions, isPiercing: true, isLaser: true, width: 15 + p * 5, height: canvas.height, lifespan: 0.3 })); this.chargeLevel = 0; this.shootCooldown = 0.5; } break; // No default shot
                 case 'blade': bullets.push(new Bullet(this.x, this.y, -90, 1200, 'player', { ...bulletOptions, isPiercing: true, width: 4 + p, height: 40 })); break;
                 case 'pulse': bullets.push(new Bullet(this.x, this.y, -90, 600, 'player', { ...bulletOptions, isWave: true, size: 15 + p * 5, lifespan: 0.2 })); break;
@@ -660,7 +673,7 @@
     }
     class Enemy {
         constructor(x, y, type) { this.x = x; this.y = y; this.type = type; const difficulty = 1 + wave * 0.22; this.init(difficulty); this.isElite = false; if (wave > 10 && Math.random() < 0.1) this.makeElite(difficulty); }
-        init(difficulty) { this.shootTimer = Math.random() * 2 + 1; this.bulletSpeed = 250 * (1 + wave * 0.1); switch(this.type) { case 'bulwark': this.size = 25; this.health = 80 * difficulty; this.color = colors.bulwark; this.speed = 30; this.scoreValue = 500; break; case 'sentinel': this.size = 18; this.health = 20 * difficulty; this.color = colors.sentinel; this.speed = 20; this.scoreValue = 400; this.laserCharge = 0; this.laserMaxCharge = 3; break; case 'barrier': this.size = 20; this.health = 30 * difficulty; this.color = colors.barrier; this.speed = 50; this.scoreValue = 350; this.shieldHealth = 50 * difficulty; break; case 'dasher': this.size = 12; this.health = 10 * difficulty; this.color = colors.dasher; this.speed = 300; this.scoreValue = 150; this.vy = this.speed; this.vx = Math.random() > 0.5 ? 100 : -100; break; case 'weaver': this.size = 18; this.health = 25 * difficulty; this.color = colors.weaver; this.speed = 80; this.scoreValue = 250; this.baseX = this.x; this.angle = 0; break; case 'kamikaze': this.size = 15; this.health = 5 * difficulty; this.color = colors.kamikaze; this.speed = 150; this.scoreValue = 200; break; case 'basic': this.size = 15; this.health = 15 * difficulty; this.color = colors.enemy1; this.speed = 100; this.scoreValue = 100; break; case 'shooter': this.size = 20; this.health = 40 * difficulty; this.color = colors.enemy2; this.speed = 60; this.scoreValue = 300; break; case 'boss': this.size = 50; this.health = (2000 + wave * 600) * difficulty; this.maxHealth = this.health; this.color = colors.boss; this.speed = 50; this.scoreValue = 10000; this.pattern = 'entry'; this.patternTimer = 0; this.patternDuration = 8; this.bulletSpeed *= 1.2; break; } }
+        init(difficulty) { this.shootTimer = Math.random() * 2 + 1; this.bulletSpeed = 250 * (1 + wave * 0.1); switch(this.type) { case 'bulwark': this.size = 25; this.health = 80 * difficulty; this.color = colors.bulwark; this.speed = 30; this.scoreValue = 500; break; case 'sentinel': this.size = 18; this.health = 20 * difficulty; this.color = colors.sentinel; this.speed = 20; this.scoreValue = 400; this.laserCharge = 0; this.laserMaxCharge = 3; break; case 'barrier': this.size = 20; this.health = 30 * difficulty; this.color = colors.barrier; this.speed = 50; this.scoreValue = 350; this.shieldHealth = 50 * difficulty; break; case 'dasher': this.size = 12; this.health = 10 * difficulty; this.color = colors.dasher; this.speed = 300; this.scoreValue = 150; this.vy = this.speed; this.vx = Math.random() > 0.5 ? 100 : -100; break; case 'weaver': this.size = 18; this.health = 25 * difficulty; this.color = colors.weaver; this.speed = 80; this.scoreValue = 250; this.baseX = this.x; this.angle = 0; break; case 'kamikaze': this.size = 15; this.health = 5 * difficulty; this.color = colors.kamikaze; this.speed = 150; this.scoreValue = 200; break; case 'basic': this.size = 15; this.health = 15 * difficulty; this.color = colors.enemy1; this.speed = 100; this.scoreValue = 100; break; case 'shooter': this.size = 20; this.health = 40 * difficulty; this.color = colors.enemy2; this.speed = 60; this.scoreValue = 300; break; case 'boss': this.size = 50; this.health = (2000 + wave * 600) * difficulty; this.maxHealth = this.health; this.color = colors.boss; this.speed = 50; this.scoreValue = 10000; this.pattern = 'entry'; this.patternTimer = 0; this.patternDuration = 8; this.bulletSpeed *= 1.2; this.moveTimer = 2; this.moveTargetX = this.x; break; } }
         makeElite(difficulty) { this.isElite = true; this.health *= 2; this.bulletSpeed *= 1.2; this.color = '#FFD700'; this.scoreValue *= 3; if (this.shieldHealth) this.shieldHealth *= 2; }
         update(deltaTime) {
             switch(this.type) {
@@ -672,17 +685,20 @@
             }
             this.shootTimer -= deltaTime * gameSpeed; if (this.shootTimer <= 0 && this.type !== 'sentinel' && this.type !== 'boss') this.shoot();
             if (this.type === 'boss') {
-                // Movement
+                // Movement with bounds checking
                 if (this.y < 150) { 
                     this.y += this.speed * deltaTime; 
                 } else { 
-                    this.y = 150;
+                    this.y = 150; // Keep boss at fixed Y position
                     this.moveTimer -= deltaTime;
                     if (this.moveTimer <= 0) {
                         this.moveTargetX = Math.random() * (canvas.width * 0.6) + (canvas.width * 0.2);
                         this.moveTimer = Math.random() * 3 + 2; // Move every 2-5 seconds
                     }
                     this.x += (this.moveTargetX - this.x) * 0.5 * deltaTime;
+                    
+                    // Ensure boss stays within screen bounds
+                    this.x = Math.max(this.size, Math.min(canvas.width - this.size, this.x));
                 }
 
                 this.patternTimer += deltaTime; 
@@ -705,7 +721,8 @@
                     this.pattern = nextPattern;
                 }
             }
-            if (this.y > canvas.height + this.size) this.health = 0;
+            // Only remove enemies that go off screen, but not bosses
+            if (this.y > canvas.height + this.size && this.type !== 'boss') this.health = 0;
         }
         draw(ctx) {
             ctx.shadowColor = this.isElite ? '#FFD700' : this.color;
@@ -888,7 +905,7 @@
             ctx.globalAlpha = 1;
         }
         shoot() {
-            this.shootCooldown = 0.2 / (1 + this.power * 0.3); // Much faster fire rate
+            this.shootCooldown = 0.4 / (1 + this.power * 0.2); // Nerfed fire rate (0.2 -> 0.4, 0.3 -> 0.2)
             
             // Enhanced bullets that clear enemy projectiles
             for (let i = 0; i < 3 + this.power; i++) {
@@ -1386,7 +1403,7 @@
         loadData(); 
 
         // DEBUG: Unlock all characters and skins
-        const isDebug = false;
+        const isDebug = false; // DEBUG MODE OFF
         if (isDebug) {
             Object.values(characters).forEach(char => {
                 char.unlocked = true;
