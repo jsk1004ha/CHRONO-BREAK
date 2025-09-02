@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>크로노 브레이크</title>
+    <link rel="icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbB8AIAAwAASQAB2Cj0NAAAAABJRU5ErkJggg==">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -835,8 +836,7 @@
                             for(let i=0; i<3; i++) {
                                 enemies.push(new Enemy(this.x + (i-1)*50, this.y, 'dasher'));
                             }
-                            this.shootTimer = 3.0;
-                            this.patternTimer = this.patternDuration; // Immediately switch to next pattern
+                            this.shootTimer = 3.0; // Spawn another wave in 3 seconds
                             break;
                         case 'desperate': 
                             bullets.push(new Bullet(this.x, this.y, angleToPlayer + Math.random()*40-20, this.bulletSpeed * 1.5, 'enemy')); 
